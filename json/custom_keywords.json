@@ -12,7 +12,7 @@
     "faceless": {"location": ["herodata", "faceless_void"], "priority": 1, "case_sensitive": false},
     "furion": {"location": ["herodata", "furion"], "priority": 1, "case_sensitive": false},
     "gyro": {"location": ["herodata", "gyrocopter"], "priority": 1, "case_sensitive": false},
-    "jugg": {"location": ["herodata", "juggernaut"], "priority": 1, "case_sensitive": false},
+    "jug": {"location": ["herodata", "juggernaut"], "priority": 1, "case_sensitive": false},
     "jugger": {"location": ["herodata", "juggernaut"], "priority": 1, "case_sensitive": false},
     "kotl": {"location": ["herodata", "keeper_of_the_light"], "priority": 1, "case_sensitive": false},
     "lanaya": {"location": ["herodata", "templar_assassin"], "priority": 1, "case_sensitive": false},
@@ -64,7 +64,8 @@
     "hood": {"location": ["itemdata", "hood_of_defiance"], "priority": 1, "case_sensitive": false},
     "lothar's": {"location": ["itemdata", "invis_sword"], "priority": 1, "case_sensitive": false},
     "stick": {"location": ["itemdata", "magic_stick"], "priority": 1, "case_sensitive": false},
-    "wand" : {"location": ["itemdata", "magic_wand"], "priority": 1, "case_sensitive": false},
+    "wand": {"location": ["itemdata", "magic_wand"], "priority": 1, "case_sensitive": false},
+    "manta": {"location": ["itemdata", "manta"], "priority": 1, "case_sensitive": false},
     "mom": {"location": ["itemdata", "mask_of_madness"], "priority": 1, "case_sensitive": false},
     "medallion": {"location": ["itemdata", "medallion_of_courage"], "priority": 1, "case_sensitive": false},
     "mechanism": {"location": ["itemdata", "mekansm"], "priority": 1, "case_sensitive": false},
@@ -90,6 +91,7 @@
     "obs": {"location": ["itemdata", "ward_observer"], "priority": 1, "case_sensitive": false},
     "sents": {"location": ["itemdata", "ward_sentry"], "priority": 1, "case_sensitive": false},
     "armlet": {"location": ["itemdata", "armlet"], "priority": 1, "case_sensitive": false},
-    "aghs": {"location": ["itemdata", "ultimate_scepter"], "priority": 1, "case_sensitive": false}
+    "aghs": {"location": ["itemdata", "ultimate_scepter"], "priority": 1, "case_sensitive": false},
+    "veil": {"location": ["itemdata", "veil_of_discord"], "priority": 1, "case_sensitive": false}
   }
 }

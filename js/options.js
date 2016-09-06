@@ -10,7 +10,7 @@ $(document).ready(function() {
     $(".DotaTooltipOptions #UpdatePeriod").val(
       (data._UPDATE_PERIOD === undefined ? "24" : data._UPDATE_PERIOD.toString()));
     $(".DotaTooltipOptions .BaseFontSize").val(
-      (data._BASE_FONT_SIZE === undefined ? "18" : data._BASE_FONT_SIZE.toString()));
+      (data._BASE_FONT_SIZE === undefined ? "11" : data._BASE_FONT_SIZE.toString()));
 
     // language callbacks
     $(".DotaTooltipOptions #Language").change(function(event) {

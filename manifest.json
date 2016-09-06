@@ -10,9 +10,7 @@
 
   "permissions": [
     "storage",
-    "activeTab",
-    "https://*.dota2.com/*",
-    "http://*.dota2.com/*"
+    "activeTab"
   ],
 
   "browser_action": {

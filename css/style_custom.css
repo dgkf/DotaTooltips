@@ -20,7 +20,7 @@ span.DotaTooltips:hover {
 	text-align: left;
 	float: left;
 	background-color: #111;
-	width: calc(25em + 40px);
+	width: calc(27em + 40px);
 	padding: 1.5em;
   margin: 0.75em;
 	border: solid #000 1px;
@@ -328,8 +328,8 @@ span.DotaTooltips:hover {
   height: 2.3em;
 }
 .DotaTooltip .StatVal img.BaseStat {
-  width: 3em;
-  height: 2.3em;
+  width: 2.7em;
+  height: 2em;
 }
 /* All of these are used to selectively show primary attribute based on class-id combo */
 .DotaTooltip .StatVal img#overviewIcon_Primary_str,

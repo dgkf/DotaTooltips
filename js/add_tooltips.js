@@ -20,7 +20,7 @@ chrome.storage.local.get(["heropedia", "_LANGUAGE", "_UPDATE_PERIOD", "_NEEDS_UP
   }
 
   var updateThreshold = new Date();
-  updateThreshold.setDate(updateThreshold.getDate() - 1/1000/(UPDATE_PERIOD === undefined ? 1 : UPDATE_PERIOD));
+  updateThreshold.setDate(updateThreshold.getDate() - 1/(UPDATE_PERIOD === undefined ? 1 : UPDATE_PERIOD));
 
   // check the age of our local copy of the heropedia and update it if it's over a day old
   if (data.heropedia === undefined) {
@@ -129,9 +129,11 @@ function modifyWebpage() {
       // no cooldown specified
       var cooldown;
       cooldown = $(".cooldownMana span").first();
-      cooldown.parent().css({"display": cooldown[0].textContent == "false" || cooldown[0].textContent == "" ? "none" : "block"});
+      if (cooldown[0] !== undefined)
+        cooldown.parent().css({"display": cooldown[0].textContent == "false" || cooldown[0].textContent == "" ? "none" : "block"});
       cooldown = $(".DotaTooltip .abilityCMB").first();
-      cooldown.css({"display": cooldown[0].innerHTML == "" ? "none" : "block"});
+      if (cooldown[0] !== undefined)
+        cooldown.css({"display": cooldown[0].innerHTML == "" ? "none" : "block"});
 
       // figure out where the best place to put it is...
       var space = { top: $(event.target)[0].getBoundingClientRect().top,
