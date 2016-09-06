@@ -25,9 +25,7 @@ chrome.storage.local.get(["heropedia", "_LANGUAGE", "_UPDATE_PERIOD", "_NEEDS_UP
   // check the age of our local copy of the heropedia and update it if it's over a day old
   if (data.heropedia === undefined) {
     log("Creating local copy of the Heropedia!");
-    updateHeropedia(LANGUAGE);
-    modifyWebpage();
-
+    updateHeropedia(LANGUAGE, modifyWebpage);
   } else {
     modifyWebpage();
 
@@ -69,8 +67,7 @@ function modifyWebpage() {
       }
 
       // update the font size
-      log(data._BASE_FONT_SIZE.toString());
-      $(".DotaTooltip").css({"font-size": (data._BASE_FONT_SIZE !== undefined ? data._BASE_FONT_SIZE.toString() + "px" : "18px")});
+      $(".DotaTooltip").css({"font-size": (data._BASE_FONT_SIZE !== undefined ? data._BASE_FONT_SIZE.toString() + "px" : "11px")});
 
       // associate callbacks for hover actions
       $(".DotaTooltips").hover(
@@ -263,7 +260,7 @@ function modifyWebpage() {
 
 
 // helper function to update our local copy of the heropedia
-function updateHeropedia(LANGUAGE) {
+function updateHeropedia(LANGUAGE, callback) {
  $.getJSON(_HEROPEDIA_BASE_LINK + (LANGUAGE === undefined ? 'english' : LANGUAGE), function(data) {
    // update local copy of heropedia
    chrome.storage.local.set( {"heropedia": {"data": data, "lastUpdate": (new Date()).toJSON()}} );
@@ -271,9 +268,14 @@ function updateHeropedia(LANGUAGE) {
    // update local keyword dictiony from updated heropedia and custom keywords
    $.getJSON(chrome.extension.getURL("/json/custom_keywords.json"), function(custom_keywords) {
      chrome.storage.local.set(
-       {"dotakeywords": buildDotaKeywordDictionary(custom_keywords[(LANGUAGE === undefined ? 'english' : LANGUAGE)], data)}
+       {"dotakeywords": buildDotaKeywordDictionary(custom_keywords[(LANGUAGE === undefined ? 'english' : LANGUAGE)], data)},
+       finished_callback
      );
     });
+
+    function finished_callback() {
+      if (callback !== undefined) callback();
+    }
   });
 }
 
