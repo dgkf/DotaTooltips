@@ -4,10 +4,15 @@ span.DotaTooltips:hover {
 
 /* GENERAL */
 .DotaTooltip {
-  font-size: 16px;
-
+  /* initialization for parameters
+     that are governed by javascript */
+  top: 0;
+  left: 0;
   visibility: hidden;
   opacity: 0.95;
+
+  /* customization parameter */
+  font-size: 16px;
 
 	position: absolute;
 	text-align: left;
@@ -168,13 +173,13 @@ span.DotaTooltips:hover {
 	font-size: 0.777em;
 	font-family:KoreanFont,arial, helvetica, sans-serif;
 	font-weight:bold;
-	line-height: ;
+	line-height: 1.222em;
 	padding: 0.1em 0;
 }
 /* ABILITY: description */
 .DotaTooltip .abilityDesc {
 	color:#c6c6c6;
-	line-height:1.111em;
+	line-height:1.222em;
 	font-size: 0.777em;
 	margin-bottom: 0.333em;
 	font-weight:bold;
@@ -211,7 +216,7 @@ span.DotaTooltips:hover {
 	color:#777777;
 	font-family:KoreanFont,arial, helvetica, sans-serif;
   font-size: 0.8em;
-  line-height: 1.8em;
+  line-height: 2.0em;
   height: 100%;
 	font-weight:normal;
 }
@@ -239,6 +244,34 @@ span.DotaTooltips:hover {
 /* HERO:  */
 .DotaTooltip .DotaTooltip_hero {
   margin: 0; padding: 0; border: 0;
+}
+.DotaTooltip .heroStats {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  background: none;
+}
+.DotaTooltip .heroName {
+	text-align:center;
+	padding-bottom: 0.333em;
+	font-family:KoreanFont,georgia,serif;
+	font-weight:normal;
+	/*text-transform:uppercase;*/
+	letter-spacing: 0.111em;
+	font-size: 1em;
+	color:#d9d9d9;
+}
+.DotaTooltip .heroRoles {
+	text-align:center;
+	color:#939393;
+	font-family:KoreanFont,arial,helvetica,sans-serif;
+	font-size: 0.888em;
+	padding: 0.222em 0 0.333em 0;
+}
+.DotaTooltip .heroAttackCability {
+  margin: 0 0.5em;
+	color:#ffffff;
 }
 .DotaTooltip .heroPortraitStats {
   position: relative;
@@ -282,29 +315,22 @@ span.DotaTooltips:hover {
 .DotaTooltip .StatVal img {
   position: absolute;
   float: left;
-  top: 0; left: 0;
-  margin: 0.4em 0.5em;
-  width: 2em;
-  height: 2em;
-}
-.DotaTooltip .StatVal img {
-  position: absolute;
-  float: left;
   top: 0em; left: 0em;
   margin: 0.4em 0.5em;
   width: 2.0em;
   height: 2.0em;
 }
+.DotaTooltip img.StatAttr {
+  width: 2.4em;
+  height: 2em;
+}
+/* All of these are used to selectively show primary attribute based on class-id combo */
 .DotaTooltip .StatVal img#overviewIcon_Primary_str,
 .DotaTooltip .StatVal img#overviewIcon_Primary_int,
 .DotaTooltip .StatVal img#overviewIcon_Primary_agi {
   top: -0.05em; left: -0.05em;
   width: 2.1em;
   height: 2.1em;
-}
-.DotaTooltip img.StatAttr {
-  width: 2.4em;
-  height: 2em;
 }
 .DotaTooltip .StatVal img#overviewIcon_Primary_str.overviewIcon_Primary_agi,
 .DotaTooltip .StatVal img#overviewIcon_Primary_str.overviewIcon_Primary_int,
@@ -318,49 +344,4 @@ span.DotaTooltips:hover {
 .DotaTooltip .StatVal img#overviewIcon_Primary_agi.overviewIcon_Primary_agi,
 .DotaTooltip .StatVal img#overviewIcon_Primary_int.overviewIcon_Primary_int {
 	opacity: 1;
-}
-
-.DotaTooltip .overviewPrimaryStats {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  height: 100px;
-}
-.DotaTooltip .heroStats {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  background: none;
-}
-.DotaTooltip .heroPrimaryStats {
-	width:180px;
-	height:62px;
-	position:relative;
-	margin:0 auto;
-	overflow:visible;
-}
-.DotaTooltip .primaryVal {
-	color:#fefefe;
-}
-.DotaTooltip .heroName {
-	text-align:center;
-	padding-bottom: 0.333em;
-	font-family:KoreanFont,georgia,serif;
-	font-weight:normal;
-	/*text-transform:uppercase;*/
-	letter-spacing: 0.111em;
-	font-size: 1em;
-	color:#d9d9d9;
-}
-.DotaTooltip .heroRoles {
-	text-align:center;
-	color:#939393;
-	font-family:KoreanFont,arial,helvetica,sans-serif;
-	font-size: 0.888em;
-	padding: 0.222em 0 0.333em 0;
-}
-.DotaTooltip .heroAttackCability {
-  margin: 0 0.5em;
-	color:#ffffff;
 }

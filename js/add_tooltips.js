@@ -3,15 +3,18 @@ var _HEROPEDIA_BASE_LINK = "https://www.dota2.com/jsfeed/heropediadata?feeds=ite
 var DEBUG = false;
 function log(input) { console.log(_EXTENSION_CONSOLE_NAME, input); } // small logging helper
 
-// list of custom keywords and abbreviations to include
-var LANGUAGE; // default: english
-var UPDATE_PERIOD = 0.000001; // [hrs] default: every 1 hour
-var CUSTOM_KEYWORDS = {};
-
 // try to load a saved version of the heropedia data. If it doesn't exist or it's too old, get a new copy and save it in local storage. Also builds a dictionary of keywords and their contents' location in the heropedia
-chrome.storage.local.get("heropedia", function(data) {
+chrome.storage.local.get(["heropedia", "_LANGUAGE", "_UPDATE_PERIOD", "_NEEDS_UPDATE"], function(data) {
+  var LANGUAGE = (data._LANGUAGE === undefined ? 'english' : data._LANGUAGE);
+  var UPDATE_PERIOD = (data._UPDATE_PERIOD == undefined ? 1 : data._UPDATE_PERIOD);
+
+  if (DEBUG) {
+    log('language set to: ' + LANGUAGE);
+    log('update period set to: ' + UPDATE_PERIOD + '/day.');
+  }
+
   var updateThreshold = new Date();
-  updateThreshold.setDate(updateThreshold.getDate() - 1/(24/(UPDATE_PERIOD === undefined ? 1 : UPDATE_PERIOD)));
+  updateThreshold.setDate(updateThreshold.getDate() - 1/(UPDATE_PERIOD === undefined ? 1 : UPDATE_PERIOD));
 
   // check the age of our local copy of the heropedia and update it if it's over a day old
   if (data.heropedia === undefined || data.heropedia.lastUpdate === undefined) {
@@ -20,6 +23,10 @@ chrome.storage.local.get("heropedia", function(data) {
   } else if (new Date(data.heropedia.lastUpdate) < updateThreshold) {
     log("Local Heropedia too old (from "+data.heropedia.lastUpdate+")! Updating now.");
     updateHeropedia();
+  } else if (data._NEEDS_UPDATE) {
+    log("Update queued due to options changes.");
+    updateHeropedia();
+    chrome.storage.local.set( {"_NEEDS_UPDATE": false} );
   }
 
   // helper function to update our local copy of the heropedia
@@ -30,13 +37,17 @@ chrome.storage.local.get("heropedia", function(data) {
 
      // update local keyword dictiony from updated heropedia and custom keywords
      $.getJSON(chrome.extension.getURL("/json/custom_keywords.json"), function(custom_keywords) {
-       chrome.storage.local.set( {"dotakeywords": buildDotaKeywordDictionary(custom_keywords, data) } );
+       chrome.storage.local.set(
+         {"dotakeywords": buildDotaKeywordDictionary(custom_keywords[(LANGUAGE === undefined ? 'english' : LANGUAGE)], data)}
+       );
       });
     });
   }
 
   // builds a dictionary of { keyword: {location: [String], priority: int, case_sensitive: Bool }}
   function buildDotaKeywordDictionary(keywords, data) {
+    keywords = (keywords !== undefined ? keywords : {} );
+
     // traverses heropedia to builds a dictionary of {keyword: location} for all dname entries
     function buildDict(loc, obj) {
       for (var k = 0; k < Object.keys(obj).length; k++)
@@ -59,7 +70,7 @@ chrome.storage.local.get("heropedia", function(data) {
 // the meat of the webpage manipulation to inject tooltip triggers and .html elements
 function modifyWebpage() {
   // load our local copy of the heropedia
-  chrome.storage.local.get(["heropedia", "dotakeywords"], function(data) {
+  chrome.storage.local.get(["heropedia", "dotakeywords", "_SCALING_FACTOR"], function(data) {
     // build a monster regex query to match for any of the keywords
     var dota_keywords_regex = new RegExp('\\b('+Object.keys(data.dotakeywords).map(escapeRegExp).join('|')+')\\b', "im");
 
@@ -78,8 +89,12 @@ function modifyWebpage() {
         key = Object.keys(data.heropedia.data)[k].replace(/data$/gi, "");
         $("body").append(
           $('<div class="DotaTooltip DotaFont DotaTooltip_'+key+'">')
-          .load(chrome.extension.getURL("/html/"+key+".html")));
+          .load(chrome.extension.getURL("/html/tooltips/"+key+".html")));
       }
+
+      // update the font size
+      log(data._SCALING_FACTOR.toString());
+      $(".DotaTooltip").css({"font-size": (data._SCALING_FACTOR !== undefined ? data._SCALING_FACTOR.toString() + "px" : "18px")});
 
       // associate callbacks for hover actions
       $(".DotaTooltips").hover(

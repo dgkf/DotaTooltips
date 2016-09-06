@@ -1,0 +1,55 @@
+.DotaTooltipOptions {
+  overflow: hidden;
+  height: 22em;
+}
+
+div, a, p, h1, h2, h3, h4, h5, h6 {
+  color: #322;
+  margin: 0.2em 0; padding: 0; border: 0;
+  line-height: 1.2em;
+}
+
+h1 {
+  display: inline;
+  font-weight: bold;
+}
+
+h4, p {
+  margin: 1em 0 0.4em 0;
+}
+
+a {
+  font-weight: bold;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #68F;
+}
+
+input {
+  display: inline;
+}
+
+input[type=range] {
+}
+
+input[type=number] {
+  position: absolute;
+  margin-top: -0.5em;
+  text-align: center;
+  width: 3em;
+  margin: 0 0.5em;
+  border: none;
+  background: #EEE;
+}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.textInputUnits {
+  position: absolute;
+  margin: 0.3em 0 0 4em;
+}

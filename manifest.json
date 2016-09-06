@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Dota Tooltips",
-  "version": "0.1",
+  "version": "0.0.1",
   "description": "Popup text for Dota 2 related keywords.",
   "author": "github.com/dgkf",
   "icons": {
@@ -13,11 +13,20 @@
     "https://*.dota2.com/*"
   ],
 
+  "browser_action": {
+    "default_popup": "html/options.html"
+  },
+
+  "options_ui": {
+    "chrome_style": true,
+    "page": "html/options.html"
+  },
+
   "content_scripts": [
     {
       "matches": ["*://*/*"],
       "js": ["ext/js/jquery-3.1.0.min.js", "js/add_tooltips.js"],
-      "css": ["css/dota_tooltips_style_custom.css"],
+      "css": ["css/style_custom.css"],
       "run_at": "document_end"
     }
   ],
