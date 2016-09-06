@@ -1,3 +1,9 @@
+/*
+ * This file is the primary script, which is run on every page to inject html elements
+ * for tooltip display.
+ *
+ */
+
 var _EXTENSION_CONSOLE_NAME = "DOTATOOLTIPS:"
 var _HEROPEDIA_BASE_LINK = "https://www.dota2.com/jsfeed/heropediadata?feeds=itemdata,abilitydata,herodata&l=";
 var DEBUG = false;
@@ -14,63 +20,33 @@ chrome.storage.local.get(["heropedia", "_LANGUAGE", "_UPDATE_PERIOD", "_NEEDS_UP
   }
 
   var updateThreshold = new Date();
-  updateThreshold.setDate(updateThreshold.getDate() - 1/(UPDATE_PERIOD === undefined ? 1 : UPDATE_PERIOD));
+  updateThreshold.setDate(updateThreshold.getDate() - 1/1000/(UPDATE_PERIOD === undefined ? 1 : UPDATE_PERIOD));
 
   // check the age of our local copy of the heropedia and update it if it's over a day old
-  if (data.heropedia === undefined || data.heropedia.lastUpdate === undefined) {
+  if (data.heropedia === undefined) {
     log("Creating local copy of the Heropedia!");
-    updateHeropedia();
-  } else if (new Date(data.heropedia.lastUpdate) < updateThreshold) {
-    log("Local Heropedia too old (from "+data.heropedia.lastUpdate+")! Updating now.");
-    updateHeropedia();
-  } else if (data._NEEDS_UPDATE) {
-    log("Update queued due to options changes.");
-    updateHeropedia();
-    chrome.storage.local.set( {"_NEEDS_UPDATE": false} );
-  }
+    updateHeropedia(LANGUAGE);
+    modifyWebpage();
 
-  // helper function to update our local copy of the heropedia
-  function updateHeropedia() {
-   $.getJSON(_HEROPEDIA_BASE_LINK + (LANGUAGE === undefined ? 'english' : LANGUAGE), function(data) {
-     // update local copy of heropedia
-     chrome.storage.local.set( {"heropedia": {"data": data, "lastUpdate": (new Date()).toJSON()}} );
+  } else {
+    modifyWebpage();
 
-     // update local keyword dictiony from updated heropedia and custom keywords
-     $.getJSON(chrome.extension.getURL("/json/custom_keywords.json"), function(custom_keywords) {
-       chrome.storage.local.set(
-         {"dotakeywords": buildDotaKeywordDictionary(custom_keywords[(LANGUAGE === undefined ? 'english' : LANGUAGE)], data)}
-       );
-      });
-    });
-  }
-
-  // builds a dictionary of { keyword: {location: [String], priority: int, case_sensitive: Bool }}
-  function buildDotaKeywordDictionary(keywords, data) {
-    keywords = (keywords !== undefined ? keywords : {} );
-
-    // traverses heropedia to builds a dictionary of {keyword: location} for all dname entries
-    function buildDict(loc, obj) {
-      for (var k = 0; k < Object.keys(obj).length; k++)
-        // if the property is 'dname', add the value of that property as a key to the dictionary with a value of its location in the heropedia
-        if (Object.keys(obj)[k] == 'dname')
-          keywords[obj[Object.keys(obj)[k]].toLowerCase()] = {location: loc, priority: 1, case_sensitive: false};
-        // otherwise continue traversing the heropedia, recursively calling this function for nested objects
-        else if (typeof obj[Object.keys(obj)[k]] == 'object'
-                 && obj[Object.keys(obj)[k]] !== null
-                 && obj[Object.keys(obj)[k]] !== undefined)
-          buildDict(loc.concat(Object.keys(obj)[k]), obj[Object.keys(obj)[k]]);
+    if (data.heropedia.lastUpdate === undefined ||
+        new Date(data.heropedia.lastUpdate) < updateThreshold) {
+      log("Local Heropedia too old (from "+data.heropedia.lastUpdate+")! Updating now.");
+      updateHeropedia(LANGUAGE);
+    } else if (data._NEEDS_UPDATE) {
+      log("Update queued due to options changes.");
+      updateHeropedia(LANGUAGE);
+      chrome.storage.local.set( {"_NEEDS_UPDATE": false} );
     }
-    buildDict([], data);
-    return keywords;
   }
-
-  modifyWebpage();
 });
 
 // the meat of the webpage manipulation to inject tooltip triggers and .html elements
 function modifyWebpage() {
   // load our local copy of the heropedia
-  chrome.storage.local.get(["heropedia", "dotakeywords", "_SCALING_FACTOR"], function(data) {
+  chrome.storage.local.get(["heropedia", "dotakeywords", "_BASE_FONT_SIZE"], function(data) {
     // build a monster regex query to match for any of the keywords
     var dota_keywords_regex = new RegExp('\\b('+Object.keys(data.dotakeywords).map(escapeRegExp).join('|')+')\\b', "im");
 
@@ -93,8 +69,8 @@ function modifyWebpage() {
       }
 
       // update the font size
-      log(data._SCALING_FACTOR.toString());
-      $(".DotaTooltip").css({"font-size": (data._SCALING_FACTOR !== undefined ? data._SCALING_FACTOR.toString() + "px" : "18px")});
+      log(data._BASE_FONT_SIZE.toString());
+      $(".DotaTooltip").css({"font-size": (data._BASE_FONT_SIZE !== undefined ? data._BASE_FONT_SIZE.toString() + "px" : "18px")});
 
       // associate callbacks for hover actions
       $(".DotaTooltips").hover(
@@ -283,4 +259,40 @@ function modifyWebpage() {
       return obj;
     }
   });
+}
+
+
+// helper function to update our local copy of the heropedia
+function updateHeropedia(LANGUAGE) {
+ $.getJSON(_HEROPEDIA_BASE_LINK + (LANGUAGE === undefined ? 'english' : LANGUAGE), function(data) {
+   // update local copy of heropedia
+   chrome.storage.local.set( {"heropedia": {"data": data, "lastUpdate": (new Date()).toJSON()}} );
+
+   // update local keyword dictiony from updated heropedia and custom keywords
+   $.getJSON(chrome.extension.getURL("/json/custom_keywords.json"), function(custom_keywords) {
+     chrome.storage.local.set(
+       {"dotakeywords": buildDotaKeywordDictionary(custom_keywords[(LANGUAGE === undefined ? 'english' : LANGUAGE)], data)}
+     );
+    });
+  });
+}
+
+// builds a dictionary of { keyword: {location: [String], priority: int, case_sensitive: Bool }}
+function buildDotaKeywordDictionary(keywords, data) {
+  keywords = (keywords !== undefined ? keywords : {} );
+
+  // traverses heropedia to builds a dictionary of {keyword: location} for all dname entries
+  function buildDict(loc, obj) {
+    for (var k = 0; k < Object.keys(obj).length; k++)
+      // if the property is 'dname', add the value of that property as a key to the dictionary with a value of its location in the heropedia
+      if (Object.keys(obj)[k] == 'dname')
+        keywords[obj[Object.keys(obj)[k]].toLowerCase()] = {location: loc, priority: 1, case_sensitive: false};
+      // otherwise continue traversing the heropedia, recursively calling this function for nested objects
+      else if (typeof obj[Object.keys(obj)[k]] == 'object'
+               && obj[Object.keys(obj)[k]] !== null
+               && obj[Object.keys(obj)[k]] !== undefined)
+        buildDict(loc.concat(Object.keys(obj)[k]), obj[Object.keys(obj)[k]]);
+  }
+  buildDict([], data);
+  return keywords;
 }

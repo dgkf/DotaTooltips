@@ -4,13 +4,13 @@ var DEBUG = true;
 function log(input) { console.log(_EXTENSION_CONSOLE_NAME, input); } // small logging helper
 
 $(document).ready(function() {
-  chrome.storage.local.get(["_LANGUAGE", "_UPDATE_PERIOD", "_SCALING_FACTOR"], function(data) {
+  chrome.storage.local.get(["_LANGUAGE", "_UPDATE_PERIOD", "_BASE_FONT_SIZE"], function(data) {
     $(".DotaTooltipOptions #Language").val(
       (data._LANGUAGE === undefined ? 'english' : data._LANGUAGE));
     $(".DotaTooltipOptions #UpdatePeriod").val(
       (data._UPDATE_PERIOD === undefined ? "24" : data._UPDATE_PERIOD.toString()));
-    $(".DotaTooltipOptions .ScalingFactor").val(
-      (data._SCALING_FACTOR === undefined ? "18" : data._SCALING_FACTOR.toString()));
+    $(".DotaTooltipOptions .BaseFontSize").val(
+      (data._BASE_FONT_SIZE === undefined ? "18" : data._BASE_FONT_SIZE.toString()));
 
     // language callbacks
     $(".DotaTooltipOptions #Language").change(function(event) {
@@ -35,20 +35,35 @@ $(document).ready(function() {
     });
 
     // scaling
-    $(".DotaTooltipOptions > .ScalingFactor").on("input change", function(event) {
+    $(".DotaTooltipOptions > .BaseFontSize").on("input change", function(event) {
       var newval = parseInt(event.target.value);
       newval = Math.max(6, Math.min(30, newval));
-      $(".DotaTooltipOptions > .ScalingFactor").val(newval);
-      chrome.storage.local.set( {"_SCALING_FACTOR": newval} );
-      data._SCALING_FACTOR = newval;
+      $(".DotaTooltipOptions > .BaseFontSize").val(newval);
+      chrome.storage.local.set( {"_BASE_FONT_SIZE": newval} );
+      data._BASE_FONT_SIZE = newval;
+
+      // update scaling of tooltip divs on current page
+      chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        chrome.tabs.executeScript(tabs[0].id, {file: "js/update_tab_settings.js"});
+      });
     });
   });
 });
 
 
 
-// THESE ARE JUST COPIED FROM add_tooltips.js
-// NEED TO MAKE THIS MORE MODULAR SOMEHOW SO THE CODE ISN"T DUPLICATED
+/*
+ * THESE ARE JUST COPIED FROM add_tooltips.js
+ * NEED TO MAKE THIS MORE MODULAR SOMEHOW SO THE CODE ISN'T DUPLICATED
+ *
+ * As far as I can tell, the best way to do this is make a background script
+ * However, I believe it would be better to just keep the code duplicated instead of having the
+ * additional process running. If anyone has more input, I'd greatly appreciate it.
+ *
+ * Another option would be to use a chrome.tab.executeScript call to run it on the active tab
+ * However, this wouldn't allow someone to change language with the extensions tab open
+ *
+ */
 
 // helper function to update our local copy of the heropedia
 function updateHeropedia(LANGUAGE) {

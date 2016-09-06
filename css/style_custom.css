@@ -12,17 +12,19 @@ span.DotaTooltips:hover {
   opacity: 0.95;
 
   /* customization parameter */
-  font-size: 16px;
+  font-size: 12px;
 
+  font-family: helvetica,verdana,arial,sans-serif;
+  font-style: normal;
 	position: absolute;
 	text-align: left;
 	float: left;
 	background-color: #111;
-	width: calc(20em + 40px);
-	padding: 1em;
-  margin: 0.5em;
+	width: calc(25em + 40px);
+	padding: 1.5em;
+  margin: 0.75em;
 	border: solid #000 1px;
-  border-radius: 0.6em;
+  border-radius: 0.9em;
 	z-index: 2000000000;
 
   background: -moz-linear-gradient(top, #2e2e2d, #000000);
@@ -75,86 +77,88 @@ span.DotaTooltips:hover {
 /* ITEM: icon and name */
 .DotaTooltip .itemIcon {
 	float:left;
-	height: 3.111em;
-  margin-right: 1em;
+	height: 4.666em;
+  margin-right: 1.5em;
 }
 .DotaTooltip > .itemName {
-	margin: 0.388em 0 0.167 4.555em;
+	margin: 0.582em 0 0.25 0.683em;
 	color:#ffffff;
-	font-size: 1em;
+	font-size: 1.5em;
 	font-family:KoreanFont,georgia,serif;
 	text-transform:uppercase;
 }
 .DotaTooltip .itemCMB {
-	padding: 0.222em 0;
+	padding: 0.333em 0;
 }
 /* ITEM: Gold cost */
 .DotaTooltip .goldIcon {
 	float:left;
-  height: 1em;
-	margin: 0.111em 0.222em 0 0;
+  height: 1.5em;
+	margin: 0.5em 0.5em 0 0;
 }
 .DotaTooltip .goldCost {
 	font-weight:bold;
 	color:#f5c433;
-	font-size: 0.833em;
+	font-size: 1.25em;
+  margin-top: 0.5em;
 }
 /* ITEM: notes? I don't think this is ever used */
 .DotaTooltip .notes {
 	font-weight:bold;
 	color:#6fe771;
-	font-size: 0.777em;
-	line-height: 1.167em;
-	padding-left: 0.111em;
-	padding-bottom: 0.444em;
+	font-size: 1.165em;
+	line-height: 1.75em;
+	padding-left: 0.166em;
+	padding-bottom: 0.666em;
 }
 /* ITEM: description */
 .DotaTooltip .description {
 	font-weight:bold;
 	color:#c0c0c0;
-	font-size: 0.777em;
-	line-height: 1.167em;
-	margin: 0.444em 0 0.444em 0;
-	padding-left: 0.111em;
+	font-size: 1.165em;
+	line-height: 1.25em;
+	margin: 0.666em 0 0.666em 0;
+	padding-left: 0.166em;
 }
 /* ITEM: attributes */
 .DotaTooltip .attribs {
 	font-weight:bold;
 	color:#7a7a7a;
-	font-size: 0.833em;
-	line-height: 1.444em;
-	margin: 0 0 0 0.611em;
-	padding-left: 0.111em;
+	font-size: 1.25em;
+	line-height: 1.333em;
+	margin: 0 0 0 0.916em;
+	padding-left: 0.166em;
 }
 /* ITEM: Cooldown & Mana */
 .DotaTooltip_item .cooldownMana {
+  font-size: 1.2em;
 	color:#fbb040;
-  margin: 0.333em 0 0 0;
-	height: 1.4em;
-  line-height: 1.5em;
+  margin: 0.75em 0 0 0;
+	height: 2em;
+  line-height: 2em;
 }
 /* ITEM: lore */
 .DotaTooltip .lore {
 	clear:right;
 	color:#afafaf;
-	font-size: 0.611em;
-	line-height: 1em;
-  margin: 0.333em 0 0 0;
-	padding: 0.222em 0 0.222em 0.111em;
+	font-size: 0.916em;
+	line-height: 1.25em;
+  margin: 0.5em 0 0 0;
+	padding: 0.333em 0 0.333em 0.333em;
 }
 
 /* ABILITY: icon */
 .DotaTooltip .abilityIcon {
 	float:left;
-	height: 3.111em;
-  margin-right: 1em;
+	height: 4.666em;
+  margin-right: 1.5em;
 }
 /* ABILITY: name */
 .DotaTooltip .abilityName {
   float: left;
-  font-size: 1em;
+  font-size: 1.5em;
 	font-weight:normal;
-  line-height: 1em;
+  line-height: 1.5em;
 	color:#ffffff;
 	font-family:KoreanFont,georgia,serif;
 	text-transform:uppercase;
@@ -162,51 +166,51 @@ span.DotaTooltips:hover {
 /* ABILITY: lines around targetting */
 .DotaTooltip .abilityHR1, .DotaTooltip .abilityHR2 {
 	background-repeat:no-repeat;
-	height: 0.111em;
+	height: 0.166em;
 	width: 100%;
-	margin:0.4em 0;
+	margin: 0.6em 0;
 	background: url( 'http://cdn.dota2.com/apps/dota2/images/tooltips/abil_hr_1.png' ) repeat-x;
+  background-color: #282828;
 }
 /* ABILITY: targetting */
 .DotaTooltip .abilityTarget {
 	color:#ffffff;
-	font-size: 0.777em;
+	font-size: 1.165em;
 	font-family:KoreanFont,arial, helvetica, sans-serif;
 	font-weight:bold;
-	line-height: 1.222em;
-	padding: 0.1em 0;
+	line-height: 1.25em;
+	padding: 0.15em 0;
 }
 /* ABILITY: description */
 .DotaTooltip .abilityDesc {
 	color:#c6c6c6;
-	line-height:1.222em;
-	font-size: 0.777em;
-	margin-bottom: 0.333em;
+	line-height: 1.2em;
+	font-size: 1.25em;
 	font-weight:bold;
-	padding:4px 0;
+	padding: 0.222em 0;
 }
 /* ABILITY: notes */
 .DotaTooltip .abilityNotes {
 	color:#6fe771;
-	line-height: 1.111em;
-	font-size: 0.777em;
-	margin-bottom: 0.333em;
+	line-height: 1.2em;
+	font-size: 1.25em;
 	font-weight:bold;
+  margin-bottom: 0.5em;
 }
-/* ABILITY: damage */
+/* ABILITY: damage & attributes */
 .DotaTooltip .abilityDmg, .DotaTooltip .abilityAttrib {
-	font-size: 0.777em;
-	font-family:KoreanFont,arial, helvetica, sans-serif;
-	font-weight:bold;
-	line-height: 1.111em;
+	font-size: 1.165em;
+	font-family: KoreanFont,arial, helvetica, sans-serif;
+	font-weight: bold;
+	line-height: 1.333em;
 	color:#c6c6c6;
-	padding: 0.222em 0;
+	margin: 0.333em 0;
 }
 /* ABILITY: cooldown & mana */
 .DotaTooltip .abilityCMB {
-  height: 1.8em;
-	padding: 0.222em 0;
-  margin: 0.111em 0 0.333em 0;
+  height: 2.4em;
+	padding: 0.333em 0;
+  margin: 0.166em 0 0.5em 0;
 }
 .DotaTooltip .abilityCMB .cooldownMana {
 	color:#fbb040;
@@ -215,13 +219,13 @@ span.DotaTooltips:hover {
 .DotaTooltip .abilityCMB .mana,.DotaTooltip .abilityCMB .cooldown {
 	color:#777777;
 	font-family:KoreanFont,arial, helvetica, sans-serif;
-  font-size: 0.8em;
+  font-size: 1.2em;
   line-height: 2.0em;
   height: 100%;
 	font-weight:normal;
 }
 .DotaTooltip .manaImg, .DotaTooltip .cooldownImg {
-	margin:0 0.333em 0 0;
+	margin:0 0.5em 0 0;
 	display:block;
 	float:left;
 }
@@ -236,8 +240,8 @@ span.DotaTooltips:hover {
 .DotaTooltip .abilityLore {
 	color:#a8a8a8;
 	font-family:KoreanFont,arial, helvetica, sans-serif;
-	font-size: 0.611em;
-	line-height: 0.999em;
+	font-size: 0.9em;
+	line-height: 1.5em;
 	text-align:left;
 }
 
@@ -254,23 +258,23 @@ span.DotaTooltips:hover {
 }
 .DotaTooltip .heroName {
 	text-align:center;
-	padding-bottom: 0.333em;
-	font-family:KoreanFont,georgia,serif;
+	padding-bottom: 0.5em;
+	font-family: KoreanFont,georgia,serif;
 	font-weight:normal;
-	/*text-transform:uppercase;*/
+	text-transform: uppercase;
 	letter-spacing: 0.111em;
-	font-size: 1em;
+	font-size: 1.2em;
 	color:#d9d9d9;
 }
 .DotaTooltip .heroRoles {
 	text-align:center;
 	color:#939393;
 	font-family:KoreanFont,arial,helvetica,sans-serif;
-	font-size: 0.888em;
-	padding: 0.222em 0 0.333em 0;
+	font-size: 1.2em;
+	padding: 0.333em 0 0.5em 0;
 }
 .DotaTooltip .heroAttackCability {
-  margin: 0 0.5em;
+  margin: 0 0.75em;
 	color:#ffffff;
 }
 .DotaTooltip .heroPortraitStats {
@@ -284,9 +288,9 @@ span.DotaTooltips:hover {
 .DotaTooltip .heroPrimaryPortraitHolder {
   position: relative;
   float: left;
-  height: calc(15.111em * 0.5);
-  width: calc(13.055em * 0.5);
-  margin-right: 0.5em;
+  height: calc(22.665em * 0.5);
+  width: calc(19.582em * 0.5);
+  margin-right: 0.75em;
 }
 .DotaTooltip .heroPrimaryPortraitImage {
   position: absolute;
@@ -305,32 +309,35 @@ span.DotaTooltips:hover {
   width: 100%;
   color:#afafaf;
   font-weight: bold;
-  font-size: 0.888em;
-  line-height: 2.5em;
+  font-size: 1.2em;
+  line-height: 3.3em;
   background: none;
 }
 .DotaTooltip .StatVal .StatText {
   margin-left: 3em;
 }
-.DotaTooltip .StatVal img {
+.DotaTooltip .StatVal img.Attr,
+.DotaTooltip .StatVal img.BaseStat {
   position: absolute;
+  margin: 0.6em 0;
   float: left;
   top: 0em; left: 0em;
-  margin: 0.4em 0.5em;
-  width: 2.0em;
-  height: 2.0em;
 }
-.DotaTooltip img.StatAttr {
-  width: 2.4em;
-  height: 2em;
+.DotaTooltip .StatVal img.Attr {
+  width: 2.3em;
+  height: 2.3em;
+}
+.DotaTooltip .StatVal img.BaseStat {
+  width: 3em;
+  height: 2.3em;
 }
 /* All of these are used to selectively show primary attribute based on class-id combo */
 .DotaTooltip .StatVal img#overviewIcon_Primary_str,
 .DotaTooltip .StatVal img#overviewIcon_Primary_int,
 .DotaTooltip .StatVal img#overviewIcon_Primary_agi {
-  top: -0.05em; left: -0.05em;
-  width: 2.1em;
-  height: 2.1em;
+  top: -0.05em;
+  width: 2.4em;
+  height: 2.4em;
 }
 .DotaTooltip .StatVal img#overviewIcon_Primary_str.overviewIcon_Primary_agi,
 .DotaTooltip .StatVal img#overviewIcon_Primary_str.overviewIcon_Primary_int,
