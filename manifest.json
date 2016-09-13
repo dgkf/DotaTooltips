@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Dota Tooltips",
-  "version": "0.0.1.2",
+  "version": "0.0.1.3",
   "description": "Popup text for Dota 2 related keywords.",
   "author": "github.com/dgkf",
   "icons": {
