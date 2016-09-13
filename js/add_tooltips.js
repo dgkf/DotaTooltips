@@ -10,9 +10,10 @@ var DEBUG = true;
 function log(input) { console.log(_EXTENSION_CONSOLE_NAME, input); } // small logging helper
 
 // try to load a saved version of the heropedia data. If it doesn't exist or it's too old, get a new copy and save it in local storage. Also builds a dictionary of keywords and their contents' location in the heropedia
-chrome.storage.local.get(["heropedia", "dotakeywords", "_LANGUAGE", "_UPDATE_PERIOD", "_NEEDS_UPDATE"], function(data) {
+chrome.storage.local.get(["heropedia", "dotakeywords", "_LANGUAGE", "_UPDATE_PERIOD", "_NEEDS_UPDATE", "_DEBUG"], function(data) {
   var LANGUAGE = (data._LANGUAGE === undefined ? 'english' : data._LANGUAGE);
-  var UPDATE_PERIOD = (data._UPDATE_PERIOD == undefined ? 1 : data._UPDATE_PERIOD);
+  var UPDATE_PERIOD = (data._UPDATE_PERIOD === undefined ? 1 : data._UPDATE_PERIOD);
+  DEBUG = DEBUG || (data._DEBUG === undefined ? false : true);
 
   if (DEBUG) {
     log('language set to: ' + LANGUAGE);
@@ -61,12 +62,12 @@ function modifyWebpage() {
                                           +')\\b', "i") };
 
     // just a quick output for debugging
-    if (DEBUG) { log(data.heropedia); log(data.dotakeywords); }
+    if (DEBUG) { log({'Heropedia': data.heropedia,'Keywords Lookup Dictionary': data.dotakeywords}); }
 
     // get the total number of keywords, traverse html text and insert spans for keywords
     var pageData = traverse(document.body);
     pageData.dotaFoundInURL = !!document.URL.match(/dota/gi);
-    $("span.DotaTooltips").attr("sensmod", (pageData.dotaFoundInURL ? -1 : 0) + (pageData.dotaFoundInText ? -1 : 0))
+    $("span.DotaTooltips").attr("specmod", (pageData.dotaFoundInURL ? -1 : 0) + (pageData.dotaFoundInText ? -1 : 0))
     log(pageData.keywordsFound + " Dota keywords found!")
     if (pageData.keywordsFound > 0) buildTooltipElements();
 
@@ -87,7 +88,7 @@ function modifyWebpage() {
       $(".DotaTooltips").hover(
         // function to call on enter
         function(event) {
-          if (Math.min(parseInt(event.target.attributes.sens.nodeValue),2) + parseInt(event.target.attributes.sensmod.nodeValue) <= 0) {
+          if (Math.min(parseInt(event.target.attributes.spec.nodeValue),2) + parseInt(event.target.attributes.specmod.nodeValue) <= 0) {
             var dataLocation = data.dotakeywords[event.target.attributes.keyword.nodeValue].location;
             var tipProperties = getPropertyFromLocation(dataLocation, data.heropedia.data);
             var tipDiv = $("div.DotaTooltip_"+dataLocation[0].replace(/data$/gi, ""));
@@ -257,7 +258,7 @@ function modifyWebpage() {
           var spanInjection = document.createElement('span');
           spanInjection.appendChild(document.createTextNode(match[0]));
           spanInjection.className = "DotaTooltips";
-          spanInjection.setAttribute("sens", data.dotakeywords[keyword].specificity );
+          spanInjection.setAttribute("spec", data.dotakeywords[keyword].specificity );
           spanInjection.setAttribute("keyword", keyword);
 
           // insert the newly created span element

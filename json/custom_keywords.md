@@ -15,6 +15,7 @@ This file specifies details about additional keywords to identify and what they 
 ```
 
 ### Detailed Format explaination
+#### Parameters
 ```language``` must match a value from the language selection in the options menu. These are all lowercase english names for the localization region.
 
 ```keyword ``` of the term to add
@@ -31,3 +32,6 @@ Lower values indicated highest priority and will always be used for tooltips. Wh
   * **3+** included for expansion, for the time being they will behave like 2
 
 ```case_sensitive``` (Default: ```false```) whether the term should match case with the keyword in the keyword dictionary.
+
+#### Organization
+keywords are organized by overwritten entries (overwriting the default names of any heropedia entry to edit the specificity of the search or case sensitivity of the text), followed by nicknames and acronyms duplicating entries. In each of these sections there are subsections for heroes, abilities and items. In total this amounts to 6 sections.
