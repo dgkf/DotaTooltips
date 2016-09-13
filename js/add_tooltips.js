@@ -66,10 +66,22 @@ function modifyWebpage() {
 
     // get the total number of keywords, traverse html text and insert spans for keywords
     var pageData = traverse(document.body);
+    pageData.uniqueKeywords = new Set(pageData.keywordsFound);
     pageData.dotaFoundInURL = !!document.URL.match(/dota/gi);
-    $("span.DotaTooltips").attr("specmod", (pageData.dotaFoundInURL ? -1 : 0) + (pageData.dotaFoundInText ? -1 : 0))
-    log(pageData.keywordsFound + " Dota keywords found!")
-    if (pageData.keywordsFound > 0) buildTooltipElements();
+    pageData.specificity =  -(pageData.dotaFoundInURL ? 1 : 0) -
+                             (pageData.dotaFoundInText ? 1 : 0) -
+                             Math.floor(Math.log10(pageData.uniqueKeywords.size) / Math.log10(5));
+
+    $("span.DotaTooltips").attr("specmod", pageData.specificity);
+    if (DEBUG) {
+      log(pageData);
+      log("Page Dota specificity rated at " + (-1*pageData.specificity) + "\n  " +
+            (pageData.dotaFoundInURL ? "1 for 'Dota' in the url\n  " : "0 for 'Dota' not found in url\n  ") +
+            (pageData.dotaFoundInText ? "1 for 'Dota' in page text\n  " : "0 for 'Dota' not found in text\n  ") +
+            Math.floor(Math.log10(pageData.uniqueKeywords.size) / Math.log10(5)) + " for the number of unique keywords found");
+      log(pageData.keywordsFound.length + " Dota keywords found! (" + pageData.uniqueKeywords.size + " unique)");
+    }
+    if (pageData.keywordsFound.length > 0) buildTooltipElements();
 
     // tooltip construction and callbacks
     function buildTooltipElements() {
@@ -88,7 +100,11 @@ function modifyWebpage() {
       $(".DotaTooltips").hover(
         // function to call on enter
         function(event) {
-          if (Math.min(parseInt(event.target.attributes.spec.nodeValue),2) + parseInt(event.target.attributes.specmod.nodeValue) + parseInt(event.target.attributes.specbase.nodeValue) <= 0) {
+          var keyword_sensitivity = parseInt(event.target.attributes.spec.nodeValue) +
+                                    parseInt(event.target.attributes.specmod.nodeValue) +
+                                    parseInt(event.target.attributes.specbase.nodeValue);
+          
+          if (keyword_sensitivity <= 0) {
             var dataLocation = data.dotakeywords[event.target.attributes.keyword.nodeValue].location;
             var tipProperties = getPropertyFromLocation(dataLocation, data.heropedia.data);
             var tipDiv = $("div.DotaTooltip_"+dataLocation[0].replace(/data$/gi, ""));
@@ -210,7 +226,7 @@ function modifyWebpage() {
 
     // html text element manipulation
     function traverse(node) {
-      var child, next, keywordsFound = 0, dotaFoundInText = false;
+      var child, next, keywordsFound = [], dotaFoundInText = false;
 
       // make sure we're not editing webpage scripts - especially that pesky 'Return' skill
       if (node.tagName != "SCRIPT") {
@@ -222,14 +238,14 @@ function modifyWebpage() {
                 while (child) {
                     next = child.nextSibling;
                     nodeData = traverse(child);
-                    keywordsFound += nodeData.keywordsFound;
+                    keywordsFound = keywordsFound.concat(nodeData.keywordsFound);
                     dotaFoundInText = dotaFoundInText || nodeData.dotaFoundInText;
                     child = next;
                 }
                 break;
 
             case 3: // Text node
-                keywordsFound += injectSpansForKeywords(node);
+                keywordsFound = keywordsFound.concat(injectSpansForKeywords(node));
                 dotaFoundInText = dotaFoundInText || !!node.nodeValue.match(/\bdota\b/gi);
                 break;
         }
@@ -238,7 +254,7 @@ function modifyWebpage() {
               "dotaFoundInText": dotaFoundInText};
     }
     function injectSpansForKeywords(textNode) {
-      var keyword, match, keywordsFound = 0;
+      var keyword, match, keywords = [];
 
       while (textNode) {
         var text = textNode.nodeValue;
@@ -248,14 +264,11 @@ function modifyWebpage() {
         if (match.case_sensitive || match.case_insensitive) {
           keyword = match.case_sensitive ? match.case_sensitive[0] : match.case_insensitive[0].toLowerCase();
           match = match.case_sensitive ? match.case_sensitive : match.case_insensitive;
-          keywordsFound++;
+          keywords.push(keyword);
 
           // split text node at keyward
           var textNodeAfterKeyword = textNode.splitText(match.index);
           textNodeAfterKeyword.nodeValue = textNodeAfterKeyword.nodeValue.substring(match[0].length);
-
-          log(data._BASE_KEYWORD_SPECIFICITY);
-
           // create a span for the tooltip
           var spanInjection = document.createElement('span');
           spanInjection.appendChild(document.createTextNode(match[0]));
@@ -263,7 +276,7 @@ function modifyWebpage() {
           spanInjection.setAttribute("spec",
             data.dotakeywords[keyword].specificity);
           spanInjection.setAttribute("specbase",
-            (data._BASE_KEYWORD_SPECIFICITY === undefined ? 0 : data._BASE_KEYWORD_SPECIFICITY);
+            (data._BASE_KEYWORD_SPECIFICITY === undefined ? 0 : data._BASE_KEYWORD_SPECIFICITY));
           spanInjection.setAttribute("keyword", keyword);
 
           // insert the newly created span element
@@ -273,7 +286,7 @@ function modifyWebpage() {
           textNode = textNodeAfterKeyword;
         }  else {
           textNode = null;
-          return keywordsFound;
+          return keywords;
         }
       }
     }

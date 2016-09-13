@@ -5,17 +5,6 @@ function log(input) { console.log(_EXTENSION_CONSOLE_NAME, input); } // small lo
 
 $(document).ready(function() {
   chrome.storage.local.get(["_LANGUAGE", "_UPDATE_PERIOD", "_BASE_FONT_SIZE", "_BASE_KEYWORD_SPECIFICITY", "_DEVMODE"], function(data) {
-    $(".DotaTooltipOptions #Language").val(
-      (data._LANGUAGE === undefined ? 'english' : data._LANGUAGE));
-    $(".DotaTooltipOptions #UpdatePeriod").val(
-      (data._UPDATE_PERIOD === undefined ? "1" : data._UPDATE_PERIOD.toString()));
-    $(".DotaTooltipOptions .BaseFontSize").val(
-      (data._BASE_FONT_SIZE === undefined ? "11" : data._BASE_FONT_SIZE.toString()));
-    $(".DotaTooltipOptions .KeywordSpecificity").val(
-      (data._BASE_KEYWORD_SPECIFICITY === undefined ? "0" : data._BASE_KEYWORD_SPECIFICITY.toString()));
-    $("#DevMode").attr("checked",
-      (data._DEVMODE === undefined ? false: data._DEVMODE));
-
     // language callbacks
     $(".DotaTooltipOptions #Language").change(function(event) {
       var newval = event.target.value;
@@ -54,6 +43,7 @@ $(document).ready(function() {
 
     // keyword specificity
     $(".DotaTooltipOptions > .KeywordSpecificity").on("input change", function(event) {
+      console.log('here');
       var newval = parseInt(event.target.value);
 
       switch(newval) {
@@ -84,22 +74,29 @@ $(document).ready(function() {
       });
     });
     $(".DotaTooltipOptions > .KeywordSpecificity").hover(
-      function(event) { $(".KeywordSpecificityInfo").css("visibility", "visible"); },
-      function(event) {
-        $(".KeywordSpecificityInfo").css("visibility", "hidden");
-        $(".KeywordSpecificityInfo").text("");
-      }
+      function(event) { $(".KeywordSpecificityInfo").css("opacity", 1); },
+      function(event) { $(".KeywordSpecificityInfo").css("opacity", 0); }
     );
 
     // dev moderate
     $("#DevMode").on("change", function(event) {
-      console.log('here1')
       if (event.target.checked !== data._DEVMODE) {
-        console.log("here2");
         chrome.storage.local.set( {"_DEVMODE": event.target.checked });
         data._DEVMODE = event.target.checked;
       }
     })
+
+
+    $(".DotaTooltipOptions #Language").val(
+      (data._LANGUAGE === undefined ? 'english' : data._LANGUAGE));
+    $(".DotaTooltipOptions #UpdatePeriod").val(
+      (data._UPDATE_PERIOD === undefined ? "1" : data._UPDATE_PERIOD.toString()));
+    $(".DotaTooltipOptions .BaseFontSize").val(
+      (data._BASE_FONT_SIZE === undefined ? "11" : data._BASE_FONT_SIZE.toString()));
+    $(".DotaTooltipOptions > .KeywordSpecificity").val(
+      (data._BASE_KEYWORD_SPECIFICITY === undefined ? "0" : data._BASE_KEYWORD_SPECIFICITY.toString())).trigger("input");
+    $("#DevMode").attr("checked",
+      (data._DEVMODE === undefined ? false: data._DEVMODE));
   });
 });
 
@@ -142,7 +139,7 @@ function buildDotaKeywordDictionary(keywords, data) {
     for (var k = 0; k < Object.keys(obj).length; k++)
       // if the property is 'dname', add the value of that property as a key to the dictionary with a value of its location in the heropedia
       if (Object.keys(obj)[k] == 'dname')
-        keywords[obj[Object.keys(obj)[k]].toLowerCase()] = {location: loc, priority: 1, case_sensitive: false};
+        keywords[obj[Object.keys(obj)[k]].toLowerCase()] = {location: loc, specificity: 0, case_sensitive: false};
       // otherwise continue traversing the heropedia, recursively calling this function for nested objects
       else if (typeof obj[Object.keys(obj)[k]] == 'object'
                && obj[Object.keys(obj)[k]] !== null
