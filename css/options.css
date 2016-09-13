@@ -1,6 +1,6 @@
 .DotaTooltipOptions {
   overflow: hidden;
-  height: 23em;
+  height: 26em;
 }
 
 div, a, p, h1, h2, h3, h4, h5, h6 {
@@ -15,7 +15,8 @@ h1 {
 }
 
 h4, p {
-  margin: 1em 0 0.4em 0;
+  display: inline-block;
+  margin: 1em 0.5em 0.4em 0;
 }
 
 a {
@@ -27,21 +28,28 @@ a:hover {
   color: #68F;
 }
 
-input {
-  display: inline;
-}
 
-input[type=range] {
+.BaseFontSizeWrapper {
+  display: flex;
+  margin-left: auto;
+  margin-right: auto;
+  width: 90%;
 }
-
-input[type=number] {
-  position: absolute;
-  margin-top: -0.5em;
-  text-align: center;
+.BaseFontSizeWrapper > input[type=range] {
+  flex: 1 1 auto;
+  width: 100%;
+}
+.BaseFontSizeWrapper > input[type=number] {
+  flex: 0 0 3em;
   width: 3em;
+  text-align: center;
   margin: 0 0.5em;
   border: none;
   background: #EEE;
+}
+.BaseFontSizeWrapper > span {
+  flex: 0 0 1.5em;
+  margin: 0.3em 0 0 0;
 }
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
@@ -49,7 +57,25 @@ input[type=number]::-webkit-outer-spin-button {
   margin: 0;
 }
 
-.textInputUnits {
+.KeywordSpecificity {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 90%;
+}
+
+.DevMode {
   position: absolute;
-  margin: 0.3em 0 0 4em;
+  margin: 0;
+  top: 0;
+  left: 0;
+
+  opacity: 0;
+  transition-property: opacity;
+  transition-duration: 1s;
+  transition-delay: 10s;
+}
+
+.DevMode:hover {
+  opacity: 1;
 }

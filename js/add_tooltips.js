@@ -6,14 +6,14 @@
 
 var _EXTENSION_CONSOLE_NAME = "DOTATOOLTIPS:"
 var _HEROPEDIA_BASE_LINK = "https://www.dota2.com/jsfeed/heropediadata?feeds=itemdata,abilitydata,herodata&l=";
-var DEBUG = true;
+var DEBUG = false;
 function log(input) { console.log(_EXTENSION_CONSOLE_NAME, input); } // small logging helper
 
 // try to load a saved version of the heropedia data. If it doesn't exist or it's too old, get a new copy and save it in local storage. Also builds a dictionary of keywords and their contents' location in the heropedia
-chrome.storage.local.get(["heropedia", "dotakeywords", "_LANGUAGE", "_UPDATE_PERIOD", "_NEEDS_UPDATE", "_DEBUG"], function(data) {
+chrome.storage.local.get(["heropedia", "dotakeywords", "_LANGUAGE", "_UPDATE_PERIOD", "_NEEDS_UPDATE", "_DEVMODE"], function(data) {
   var LANGUAGE = (data._LANGUAGE === undefined ? 'english' : data._LANGUAGE);
   var UPDATE_PERIOD = (data._UPDATE_PERIOD === undefined ? 1 : data._UPDATE_PERIOD);
-  DEBUG = DEBUG || (data._DEBUG === undefined ? false : true);
+  DEBUG = DEBUG || (data._DEVMODE === undefined ? false : true);
 
   if (DEBUG) {
     log('language set to: ' + LANGUAGE);
@@ -21,7 +21,7 @@ chrome.storage.local.get(["heropedia", "dotakeywords", "_LANGUAGE", "_UPDATE_PER
   }
 
   var updateThreshold = new Date();
-  updateThreshold.setDate(updateThreshold.getDate() - 1/10000/(UPDATE_PERIOD === undefined ? 1 : UPDATE_PERIOD));
+  updateThreshold.setDate(updateThreshold.getDate() - 1/(UPDATE_PERIOD === undefined ? 1 : UPDATE_PERIOD));
 
   // check the age of our local copy of the heropedia and update it if it's over a day old
   if (data.heropedia === undefined || data.dotakeywords === undefined) {
@@ -45,7 +45,7 @@ chrome.storage.local.get(["heropedia", "dotakeywords", "_LANGUAGE", "_UPDATE_PER
 // the meat of the webpage manipulation to inject tooltip triggers and .html elements
 function modifyWebpage() {
   // load our local copy of the heropedia
-  chrome.storage.local.get(["heropedia", "dotakeywords", "_BASE_FONT_SIZE"], function(data) {
+  chrome.storage.local.get(["heropedia", "dotakeywords", "_BASE_FONT_SIZE", "_BASE_KEYWORD_SPECIFICITY"], function(data) {
     // build a monster regex query to match for any of the keywords
     var dota_keywords_regex = {
       case_sensitive: new RegExp('\\b('+Object.keys(data.dotakeywords)
@@ -88,7 +88,7 @@ function modifyWebpage() {
       $(".DotaTooltips").hover(
         // function to call on enter
         function(event) {
-          if (Math.min(parseInt(event.target.attributes.spec.nodeValue),2) + parseInt(event.target.attributes.specmod.nodeValue) <= 0) {
+          if (Math.min(parseInt(event.target.attributes.spec.nodeValue),2) + parseInt(event.target.attributes.specmod.nodeValue) + parseInt(event.target.attributes.specbase.nodeValue) <= 0) {
             var dataLocation = data.dotakeywords[event.target.attributes.keyword.nodeValue].location;
             var tipProperties = getPropertyFromLocation(dataLocation, data.heropedia.data);
             var tipDiv = $("div.DotaTooltip_"+dataLocation[0].replace(/data$/gi, ""));
@@ -254,11 +254,16 @@ function modifyWebpage() {
           var textNodeAfterKeyword = textNode.splitText(match.index);
           textNodeAfterKeyword.nodeValue = textNodeAfterKeyword.nodeValue.substring(match[0].length);
 
+          log(data._BASE_KEYWORD_SPECIFICITY);
+
           // create a span for the tooltip
           var spanInjection = document.createElement('span');
           spanInjection.appendChild(document.createTextNode(match[0]));
           spanInjection.className = "DotaTooltips";
-          spanInjection.setAttribute("spec", data.dotakeywords[keyword].specificity );
+          spanInjection.setAttribute("spec",
+            data.dotakeywords[keyword].specificity);
+          spanInjection.setAttribute("specbase",
+            (data._BASE_KEYWORD_SPECIFICITY === undefined ? 0 : data._BASE_KEYWORD_SPECIFICITY);
           spanInjection.setAttribute("keyword", keyword);
 
           // insert the newly created span element

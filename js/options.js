@@ -4,13 +4,17 @@ var DEBUG = true;
 function log(input) { console.log(_EXTENSION_CONSOLE_NAME, input); } // small logging helper
 
 $(document).ready(function() {
-  chrome.storage.local.get(["_LANGUAGE", "_UPDATE_PERIOD", "_BASE_FONT_SIZE"], function(data) {
+  chrome.storage.local.get(["_LANGUAGE", "_UPDATE_PERIOD", "_BASE_FONT_SIZE", "_BASE_KEYWORD_SPECIFICITY", "_DEVMODE"], function(data) {
     $(".DotaTooltipOptions #Language").val(
       (data._LANGUAGE === undefined ? 'english' : data._LANGUAGE));
     $(".DotaTooltipOptions #UpdatePeriod").val(
       (data._UPDATE_PERIOD === undefined ? "1" : data._UPDATE_PERIOD.toString()));
     $(".DotaTooltipOptions .BaseFontSize").val(
       (data._BASE_FONT_SIZE === undefined ? "11" : data._BASE_FONT_SIZE.toString()));
+    $(".DotaTooltipOptions .KeywordSpecificity").val(
+      (data._BASE_KEYWORD_SPECIFICITY === undefined ? "0" : data._BASE_KEYWORD_SPECIFICITY.toString()));
+    $("#DevMode").attr("checked",
+      (data._DEVMODE === undefined ? false: data._DEVMODE));
 
     // language callbacks
     $(".DotaTooltipOptions #Language").change(function(event) {
@@ -35,10 +39,10 @@ $(document).ready(function() {
     });
 
     // scaling
-    $(".DotaTooltipOptions > .BaseFontSize").on("input change", function(event) {
+    $(".DotaTooltipOptions .BaseFontSize").on("input change", function(event) {
       var newval = parseInt(event.target.value);
       newval = Math.max(6, Math.min(30, newval));
-      $(".DotaTooltipOptions > .BaseFontSize").val(newval);
+      $(".DotaTooltipOptions .BaseFontSize").val(newval);
       chrome.storage.local.set( {"_BASE_FONT_SIZE": newval} );
       data._BASE_FONT_SIZE = newval;
 
@@ -47,6 +51,55 @@ $(document).ready(function() {
         chrome.tabs.executeScript(tabs[0].id, {file: "js/update_tab_settings.js"});
       });
     });
+
+    // keyword specificity
+    $(".DotaTooltipOptions > .KeywordSpecificity").on("input change", function(event) {
+      var newval = parseInt(event.target.value);
+
+      switch(newval) {
+        case 2:
+          $(".KeywordSpecificityInfo").text("strict");
+          break;
+        case 1:
+          $(".KeywordSpecificityInfo").text("conservative");
+          break;
+        case 0:
+          $(".KeywordSpecificityInfo").text("moderate (default)");
+          break;
+        case -1:
+          $(".KeywordSpecificityInfo").text("liberal");
+          break;
+        case -2:
+          $(".KeywordSpecificityInfo").text("Dota everywhere!");
+          break;
+      }
+
+      newval = Math.max(-2, Math.min(2, newval));
+      chrome.storage.local.set( {"_BASE_KEYWORD_SPECIFICITY": newval} );
+      data._BASE_KEYWORD_SPECIFICITY = newval;
+
+      // update specificity on current page
+      chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        chrome.tabs.executeScript(tabs[0].id, {file: "js/update_tab_settings.js"});
+      });
+    });
+    $(".DotaTooltipOptions > .KeywordSpecificity").hover(
+      function(event) { $(".KeywordSpecificityInfo").css("visibility", "visible"); },
+      function(event) {
+        $(".KeywordSpecificityInfo").css("visibility", "hidden");
+        $(".KeywordSpecificityInfo").text("");
+      }
+    );
+
+    // dev moderate
+    $("#DevMode").on("change", function(event) {
+      console.log('here1')
+      if (event.target.checked !== data._DEVMODE) {
+        console.log("here2");
+        chrome.storage.local.set( {"_DEVMODE": event.target.checked });
+        data._DEVMODE = event.target.checked;
+      }
+    })
   });
 });
 

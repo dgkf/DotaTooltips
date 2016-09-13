@@ -7,7 +7,7 @@
   <body>
     <div class="DotaTooltipOptions">
       <span><h1>Dota Tooltips</h1></span>
-      <p>Dota keyword tooltips on every page!</p>
+      <p>Dota keyword tooltips on every page!</p><br/>
       <h4>Language</h4>
       <select id="Language">
         <option value="english" selected="selected">English</option>
@@ -36,19 +36,24 @@
         <option value="thai">&#x0e44;&#x0e17;&#x0e22; (Thai)</option>
         <option value="turkish">T&uuml;rk&ccedil;e (Turkish)</option>
         <option value="ukrainian">&#x0423;&#x043a;&#x0440;&#x0430;&#x0457;&#x043d;&#x0441;&#x044c;&#x043a;&#x0430; (Ukrainian)</option>
-      </select>
-      <span><sup>(requires page refresh)</sup></span>
-      <h4>Update Heropedia Every...</h4>
+      </select><br/>
+      <span><sup>(requires page refresh)</sup></span><br/>
+      <h4>Update Heropedia Every </h4>
       <select id="UpdatePeriod">
         <option value="1440">Minute</option>
         <option value="24">Hour</option>
         <option value="1" selected="selected">Day</option>
         <option value="0.0333">Month</option>
-      </select>
-      <h4>Font Size</h4>
-      <input class="BaseFontSize" type="range" min="6" max="24" step="1" value="11"></input>
-      <input class="BaseFontSize" type="number" value="11"></input><span class="textInputUnits">px</span>
+      </select><br/>
+      <h4>Font Size</h4><br/>
+      <div class="BaseFontSizeWrapper">
+        <input class="BaseFontSize" type="range" min="6" max="24" step="1" value="11"></input>
+        <input class="BaseFontSize" type="number" value="11"></input><span class="textInputUnits">px</span>
+      </div>
+      <h4>Keyword Specificity </h4><span class="KeywordSpecificityInfo"></span>
+      <input class="KeywordSpecificity" type="range" min="-2" max="2" step="1" value="0"></input>
       <p>Questions? Feedback? Want to help? Visit the <a target="_blank" href="https://github.com/dgkf/DotaTooltips">Project's GitHub</a></p>
+      <div class="DevMode"><input type="checkbox" id="DevMode"></div>
     </div>
   </body>
 </html>
