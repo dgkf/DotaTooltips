@@ -6,7 +6,7 @@
 
 var _EXTENSION_CONSOLE_NAME = "DOTATOOLTIPS:"
 var _HEROPEDIA_BASE_LINK = "https://www.dota2.com/jsfeed/heropediadata?feeds=itemdata,abilitydata,herodata&l=";
-var DEBUG = false;
+var DEBUG = true;
 function log(input) { console.log(_EXTENSION_CONSOLE_NAME, input); } // small logging helper
 
 // try to load a saved version of the heropedia data. If it doesn't exist or it's too old, get a new copy and save it in local storage. Also builds a dictionary of keywords and their contents' location in the heropedia
@@ -51,13 +51,13 @@ function modifyWebpage() {
       case_sensitive: new RegExp('\\b('+Object.keys(data.dotakeywords)
                                           .map(function(k) { return data.dotakeywords[k].case_sensitive ? k : undefined })
                                           .filter(function(k) { return k !== undefined; })
-                                          .map(function(k) { return data.dotakeywords[k].key_uses_regex ? k : escapeRegExp(k) })
+                                          .map(function(k) { return data.dotakeywords[k].keyregex ? k : escapeRegExp(k) })
                                           .join('|')
                                           +')\\b', ""),
       case_insensitive: new RegExp('\\b('+Object.keys(data.dotakeywords)
                                           .map(function(k) { return !data.dotakeywords[k].case_sensitive ? k : undefined })
                                           .filter(function(k) { return k !== undefined; })
-                                          .map(function(k) { return data.dotakeywords[k].key_uses_regex ? k : escapeRegExp(k) })
+                                          .map(function(k) { return data.dotakeywords[k].keyregex ? k : escapeRegExp(k) })
                                           .join('|')
                                           +')\\b', "i") };
 
@@ -103,9 +103,9 @@ function modifyWebpage() {
           var keyword_sensitivity = parseInt(event.target.attributes.spec.nodeValue) +
                                     parseInt(event.target.attributes.specmod.nodeValue) +
                                     parseInt(event.target.attributes.specbase.nodeValue);
-          
+
           if (keyword_sensitivity <= 0) {
-            var dataLocation = data.dotakeywords[event.target.attributes.keyword.nodeValue].location;
+            var dataLocation = event.target.attributes.loc.nodeValue.split(".");
             var tipProperties = getPropertyFromLocation(dataLocation, data.heropedia.data);
             var tipDiv = $("div.DotaTooltip_"+dataLocation[0].replace(/data$/gi, ""));
             tipProperties.objname = dataLocation[dataLocation.length-1];
@@ -277,7 +277,7 @@ function modifyWebpage() {
             data.dotakeywords[keyword].specificity);
           spanInjection.setAttribute("specbase",
             (data._BASE_KEYWORD_SPECIFICITY === undefined ? 0 : data._BASE_KEYWORD_SPECIFICITY));
-          spanInjection.setAttribute("keyword", keyword);
+          spanInjection.setAttribute("loc", data.dotakeywords[keyword].location.join("."));
 
           // insert the newly created span element
           textNode.parentNode.insertBefore(spanInjection, textNodeAfterKeyword);

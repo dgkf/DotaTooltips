@@ -1,0 +1,4 @@
+[
+  {"platform": "chrome", "extension": "zip", "version": "0.0.1.4"},
+  {"platform": "firefox", "extension": "xpi", "version": "0.0.1.0"}
+]

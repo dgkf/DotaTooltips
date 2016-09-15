@@ -174,6 +174,7 @@
     "lothar's": {"location": ["itemdata", "invis_sword"], "specificity": 0, "case_sensitive": false},
     "stick": {"location": ["itemdata", "magic_stick"], "specificity": 2, "case_sensitive": false},
     "wand": {"location": ["itemdata", "magic_wand"], "specificity": 2, "case_sensitive": false},
+    "lotus": {"location": ["itemdata", "lotus_orb"], "specificity": 2, "case_sensitive": false},
     "manta": {"location": ["itemdata", "manta"], "specificity": 0, "case_sensitive": false},
     "mom": {"location": ["itemdata", "mask_of_madness"], "specificity": 3, "case_sensitive": false},
     "medallion": {"location": ["itemdata", "medallion_of_courage"], "specificity": 1, "case_sensitive": false},
