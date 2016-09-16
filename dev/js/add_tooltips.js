@@ -4,10 +4,8 @@
  *
  */
 
-var _EXTENSION_CONSOLE_NAME = "DOTATOOLTIPS:"
-var _HEROPEDIA_BASE_LINK = "https://www.dota2.com/jsfeed/heropediadata?feeds=itemdata,abilitydata,herodata&l=";
 var DEBUG = false;
-function log(input) { console.log(_EXTENSION_CONSOLE_NAME, input); } // small logging helper
+function log(input, override) { if (DEBUG || override) console.log("DOTATOOLTIPS:", input); } // small logging helper
 
 // try to load a saved version of the heropedia data. If it doesn't exist or it's too old, get a new copy and save it in local storage. Also builds a dictionary of keywords and their contents' location in the heropedia
 chrome.storage.local.get(
@@ -22,29 +20,31 @@ function(data) {
   var UPDATE_PERIOD = (data._UPDATE_PERIOD === undefined ? 1 : data._UPDATE_PERIOD);
   DEBUG = DEBUG || (data._DEVMODE === undefined ? false : true);
 
-  if (DEBUG) {
-    log('language set to: ' + LANGUAGE);
-    log('update period set to: ' + UPDATE_PERIOD + '/day.');
-  }
+  log('language set to: ' + LANGUAGE);
+  log('update period set to: ' + UPDATE_PERIOD + '/day.');
 
   var updateThreshold = new Date();
   updateThreshold.setDate(updateThreshold.getDate() - 1/(UPDATE_PERIOD === undefined ? 1 : UPDATE_PERIOD));
 
   // check the age of our local copy of the heropedia and update it if it's over a day old
   if (data.heropedia === undefined || data.dotakeywords === undefined) {
-    log("Creating local copy of the Heropedia!");
-    updateHeropedia(LANGUAGE, function() { if (DEBUG) log('Done.'); modifyWebpage(); });
+    chrome.runtime.sendMessage(
+      { target: "updateLocalHeropedia",
+        language: LANGUAGE },
+        modifyWebpage
+    );
   } else {
     modifyWebpage();
 
     if (data.heropedia.lastUpdate === undefined ||
         new Date(data.heropedia.lastUpdate) < updateThreshold) {
       log("Local Heropedia too old (from "+data.heropedia.lastUpdate+")! Updating now.");
-      updateHeropedia(LANGUAGE);
+      chrome.runtime.sendMessage({ target: "updateLocalHeropedia", language: LANGUAGE },
+          function() { log('Done.'); });
     } else if (data._NEEDS_UPDATE) {
       log("Update queued due to options changes.");
-      updateHeropedia(LANGUAGE);
-      chrome.storage.local.set( {"_NEEDS_UPDATE": false} );
+      chrome.runtime.sendMessage({ target: "updateLocalHeropedia", language: LANGUAGE },
+          function() { log('Done.'); });
     }
   }
 });
@@ -55,21 +55,22 @@ function modifyWebpage() {
   chrome.storage.local.get(["heropedia", "dotakeywords", "_BASE_FONT_SIZE", "_BASE_KEYWORD_SPECIFICITY"], function(data) {
     // build a monster regex query to match for any of the keywords
     var dota_keywords_regex = {
-      case_sensitive: new RegExp('\\b('+Object.keys(data.dotakeywords)
-                                          .map(function(k) { return data.dotakeywords[k].case_sensitive ? k : undefined })
-                                          .filter(function(k) { return k !== undefined; })
-                                          .map(function(k) { return data.dotakeywords[k].keyregex ? k : escapeRegExp(k) })
-                                          .join('|')
-                                          +')\\b', ""),
-      case_insensitive: new RegExp('\\b('+Object.keys(data.dotakeywords)
-                                          .map(function(k) { return !data.dotakeywords[k].case_sensitive ? k : undefined })
-                                          .filter(function(k) { return k !== undefined; })
-                                          .map(function(k) { return data.dotakeywords[k].keyregex ? k : escapeRegExp(k) })
-                                          .join('|')
-                                          +')\\b', "i") };
+      case_sensitive: Object.keys(data.dotakeywords)
+                      .map(function(k) { return data.dotakeywords[k].case_sensitive ? k : undefined })
+                      .filter(function(k) { return k !== undefined; })
+                      .map(function(k) { return data.dotakeywords[k].keyregex ? k : escapeRegExp(k) })
+                      .join('|'),
+      case_insensitive: Object.keys(data.dotakeywords)
+                      .map(function(k) { return !data.dotakeywords[k].case_sensitive ? k : undefined })
+                      .filter(function(k) { return k !== undefined; })
+                      .map(function(k) { return data.dotakeywords[k].keyregex ? k : escapeRegExp(k) })
+                      .join('|') };
+    // handle case where no dictionary entries exist
+    dota_keywords_regex.case_sensitive = (dota_keywords_regex.case_sensitive == "" ? undefined : new RegExp('\\b('+dota_keywords_regex.case_sensitive+')\\b', ""));
+    dota_keywords_regex.case_insensitive = (dota_keywords_regex.case_insensitive == "" ? undefined : new RegExp('\\b('+dota_keywords_regex.case_insensitive+')\\b', "i"));
 
     // just a quick output for debugging
-    if (DEBUG) { log({'Heropedia': data.heropedia,'Keywords Lookup Dictionary': data.dotakeywords}); }
+    log({'Heropedia': data.heropedia,'Keywords Lookup Dictionary': data.dotakeywords});
 
     // get the total number of keywords, traverse html text and insert spans for keywords
     var pageData = traverse(document.body);
@@ -79,15 +80,17 @@ function modifyWebpage() {
                              (pageData.dotaFoundInText ? 1 : 0) -
                              Math.floor(Math.log10(pageData.uniqueKeywords.size) / Math.log10(5));
 
+    // update elements with specificity modifier (calculated above)
     $("span.DotaTooltips").attr("specmod", pageData.specificity);
-    if (DEBUG) {
-      log(pageData);
-      log("Page Dota specificity rated at " + (-1*pageData.specificity) + "\n  " +
-            (pageData.dotaFoundInURL ? "1 for 'Dota' in the url\n  " : "0 for 'Dota' not found in url\n  ") +
-            (pageData.dotaFoundInText ? "1 for 'Dota' in page text\n  " : "0 for 'Dota' not found in text\n  ") +
-            Math.floor(Math.log10(pageData.uniqueKeywords.size) / Math.log10(5)) + " for the number of unique keywords found");
-      log(pageData.keywordsFound.length + " Dota keywords found! (" + pageData.uniqueKeywords.size + " unique)");
-    }
+    log(pageData);
+    log("Page Dota specificity rated at " + (-1*pageData.specificity) + "\n  " +
+          (pageData.dotaFoundInURL ? "1 for 'Dota' in the url\n  " : "0 for 'Dota' not found in url\n  ") +
+          (pageData.dotaFoundInText ? "1 for 'Dota' in page text\n  " : "0 for 'Dota' not found in text\n  ") +
+          Math.floor(Math.log10(pageData.uniqueKeywords.size) / Math.log10(5)) + " for the number of unique keywords found");
+    log(pageData.keywordsFound.length + " Dota keywords found! (" + pageData.uniqueKeywords.size + " unique)", true);
+
+    // pass number of keywords found to background script to update icon
+    chrome.runtime.sendMessage({target: "updateBadgeText", text: pageData.keywordsFound.length.toString()});
     if (pageData.keywordsFound.length > 0) buildTooltipElements();
 
     // tooltip construction and callbacks
@@ -264,8 +267,9 @@ function modifyWebpage() {
 
       while (textNode) {
         var text = textNode.nodeValue;
-        var match = { case_sensitive: text.match(dota_keywords_regex.case_sensitive),
-                      case_insensitive: text.match(dota_keywords_regex.case_insensitive) };
+        var match = {
+          case_sensitive: dota_keywords_regex.case_sensitive !== undefined ? text.match(dota_keywords_regex.case_sensitive) : null,
+          case_insensitive: dota_keywords_regex.case_insensitive !== undefined ? text.match(dota_keywords_regex.case_insensitive) : null };
 
         if (match.case_sensitive || match.case_insensitive) {
           keyword = match.case_sensitive ? match.case_sensitive[0] : match.case_insensitive[0].toLowerCase();
@@ -279,8 +283,7 @@ function modifyWebpage() {
           var spanInjection = document.createElement('span');
           spanInjection.appendChild(document.createTextNode(match[0]));
           spanInjection.className = "DotaTooltips";
-          spanInjection.setAttribute("spec",
-            data.dotakeywords[keyword].specificity);
+          spanInjection.setAttribute("spec", data.dotakeywords[keyword].specificity);
           spanInjection.setAttribute("specbase",
             (data._BASE_KEYWORD_SPECIFICITY === undefined ? 0 : data._BASE_KEYWORD_SPECIFICITY));
           spanInjection.setAttribute("loc", data.dotakeywords[keyword].location.join("."));
@@ -306,54 +309,4 @@ function modifyWebpage() {
       return obj;
     }
   });
-}
-
-// helper function to update our local copy of the heropedia
-function updateHeropedia(LANGUAGE, callback) {
-  var heropedia_req = new XMLHttpRequest();
-  heropedia_req.addEventListener("load", function(req_data) {
-    // update local copy of heropedia
-    chrome.storage.local.set(
-      {"heropedia": {"data": jQuery.parseJSON(req_data.target.responseText),
-                     "lastUpdate": (new Date()).toJSON()} }
-    );
-
-    chrome.storage.local.get(['heropedia'], function(data) {
-      // update local keyword dictionary from updated heropedia and custom keywords
-      $.getJSON(chrome.extension.getURL("/json/custom_keywords.json"), function(custom_keywords) {
-        chrome.storage.local.set(
-          {"dotakeywords": buildDotaKeywordDictionary(custom_keywords[(LANGUAGE === undefined ? 'english' : LANGUAGE)], data.heropedia.data)},
-          finished_callback
-        );
-      });
-
-      function finished_callback() {
-        if (callback !== undefined) callback();
-      }
-    });
-  });
-  heropedia_req.open("GET", _HEROPEDIA_BASE_LINK + (LANGUAGE === undefined ? 'english' : LANGUAGE));
-  heropedia_req.send();
-}
-
-// builds a dictionary of { keyword: {location: [String], priority: int, case_sensitive: Bool }}
-function buildDotaKeywordDictionary(additional_keywords, data) {
-  keywords = {};
-
-  // traverses heropedia to builds a dictionary of {keyword: location} for all dname entries
-  function buildDict(loc, obj) {
-    for (var k = 0; k < Object.keys(obj).length; k++)
-      // if the property is 'dname', add the value of that property as a key to the dictionary with a value of its location in the heropedia
-      if (Object.keys(obj)[k] == 'dname')
-        keywords[obj[Object.keys(obj)[k]].toLowerCase()] = {location: loc, specificity: 0, case_sensitive: false};
-      // otherwise continue traversing the heropedia, recursively calling this function for nested objects
-      else if (typeof obj[Object.keys(obj)[k]] == 'object'
-               && obj[Object.keys(obj)[k]] !== null
-               && obj[Object.keys(obj)[k]] !== undefined)
-        buildDict(loc.concat(Object.keys(obj)[k]), obj[Object.keys(obj)[k]]);
-  }
-
-  buildDict([], data);
-  jQuery.extend(true, keywords, additional_keywords);
-  return keywords;
 }

@@ -1,7 +1,11 @@
 var _EXTENSION_CONSOLE_NAME = "DOTATOOLTIPS:"
 var _HEROPEDIA_BASE_LINK = "https://www.dota2.com/jsfeed/heropediadata?feeds=itemdata,abilitydata,herodata&l=";
-var DEBUG = true;
-function log(input) { console.log(_EXTENSION_CONSOLE_NAME, input); } // small logging helper
+
+function log(input, override) {
+  chrome.storage.local.get(['_DEVMODE'], function(data) {
+    if (data._DEVMODE || override) console.log("DOTATOOLTIPS:", input);
+  });
+}
 
 $(document).ready(function() {
   chrome.storage.local.get(["_LANGUAGE", "_UPDATE_PERIOD", "_BASE_FONT_SIZE", "_BASE_KEYWORD_SPECIFICITY", "_DEVMODE"], function(data) {
@@ -14,9 +18,8 @@ $(document).ready(function() {
         data._LANGUAGE = newval;
         chrome.storage.local.set( {"_NEEDS_UPDATE": true } );
         log("Updating heropedia due to language change.");
-        updateHeropedia(newval);
+        chrome.runtime.sendMessage({ target: "updateLocalHeropedia", language: newval }, function() { log("Done.") });
         log("Updating heropedia done!");
-        chrome.storage.local.set( {"_NEEDS_UPDATE": false } );
       }
     });
 
@@ -98,53 +101,3 @@ $(document).ready(function() {
       (data._DEVMODE === undefined ? false: data._DEVMODE));
   });
 });
-
-
-
-/*
- * THESE ARE JUST COPIED FROM add_tooltips.js
- * NEED TO MAKE THIS MORE MODULAR SOMEHOW SO THE CODE ISN'T DUPLICATED
- *
- * As far as I can tell, the best way to do this is make a background script
- * However, I believe it would be better to just keep the code duplicated instead of having the
- * additional process running. If anyone has more input, I'd greatly appreciate it.
- *
- * Another option would be to use a chrome.tab.executeScript call to run it on the active tab
- * However, this wouldn't allow someone to change language with the extensions tab open
- *
- */
-
-// helper function to update our local copy of the heropedia
-function updateHeropedia(LANGUAGE) {
- $.getJSON(_HEROPEDIA_BASE_LINK + (LANGUAGE === undefined ? 'english' : LANGUAGE), function(data) {
-   // update local copy of heropedia
-   chrome.storage.local.set( {"heropedia": {"data": data, "lastUpdate": (new Date()).toJSON()}} );
-
-   // update local keyword dictiony from updated heropedia and custom keywords
-   $.getJSON(chrome.extension.getURL("/json/custom_keywords.json"), function(custom_keywords) {
-     chrome.storage.local.set(
-       {"dotakeywords": buildDotaKeywordDictionary(custom_keywords[(LANGUAGE === undefined ? 'english' : LANGUAGE)], data)}
-     );
-    });
-  });
-}
-
-// builds a dictionary of { keyword: {location: [String], priority: int, case_sensitive: Bool }}
-function buildDotaKeywordDictionary(keywords, data) {
-  keywords = (keywords !== undefined ? keywords : {} );
-
-  // traverses heropedia to builds a dictionary of {keyword: location} for all dname entries
-  function buildDict(loc, obj) {
-    for (var k = 0; k < Object.keys(obj).length; k++)
-      // if the property is 'dname', add the value of that property as a key to the dictionary with a value of its location in the heropedia
-      if (Object.keys(obj)[k] == 'dname')
-        keywords[obj[Object.keys(obj)[k]].toLowerCase()] = {location: loc, specificity: 0, case_sensitive: false};
-      // otherwise continue traversing the heropedia, recursively calling this function for nested objects
-      else if (typeof obj[Object.keys(obj)[k]] == 'object'
-               && obj[Object.keys(obj)[k]] !== null
-               && obj[Object.keys(obj)[k]] !== undefined)
-        buildDict(loc.concat(Object.keys(obj)[k]), obj[Object.keys(obj)[k]]);
-  }
-  buildDict([], data);
-  return keywords;
-}

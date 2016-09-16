@@ -6,8 +6,6 @@
   "author": "github.com/dgkf",
 
   "icons": {
-    "32": "icons/dotatooltips_icon_32.png",
-    "48": "icons/dotatooltips_icon_48.png",
     "128": "icons/dotatooltips_icon_128.png"
   },
 
@@ -18,8 +16,12 @@
     "https://www.dota2.com/*"
   ],
 
+  "background": {
+    "scripts": ["third_party_resources/js/jquery-3.1.0.min.js", "js/background.js"]
+  },
+
   "browser_action": {
-    "default_icon": "icons/dotatooltips_icon_48.png",
+    "default_icon": "icons/dotatooltips_icon_128.png",
     "default_title": "Dota Tooltips",
     "default_popup": "html/options.html"
   },
