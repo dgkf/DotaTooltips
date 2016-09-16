@@ -92,10 +92,6 @@ function modifyWebpage() {
 
     // tooltip construction and callbacks
     function buildTooltipElements() {
-      // modify content security policy to allow image-src from http://cdn.dota2.com
-      // this didn't end up making a difference.
-      $("head").append('<meta http-equiv="Content-Security-Policy" content="img-src http://cdn.dota2.com;">');
-
       // create divs as placeholders for the tooltips
       for (var k = 0, key, newDiv; k < Object.keys(data.heropedia.data).length; k++) {
         key = Object.keys(data.heropedia.data)[k].replace(/data$/gi, "");
