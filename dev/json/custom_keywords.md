@@ -25,11 +25,12 @@ eg: The data in ```heropedia.herodata.ancient_apparition``` would become ```["he
 
 ```specificity``` (Default: ```0```) A number representing how specific the term is to its Dota related meaning. Words like "am" may mean Anti-mage in a very specific context, but it's unlikely it's Dota related in most usages.
 Lower values indicated highest priority and will always be used for tooltips. What each higher value represents is still under development.
-  ##### Current Plan of Action:
+
+##### Default
+(Can be offset by setting content filter [-2 to +2])
   * **0** always highlighted
   * **1** highlighted if "Dota" is found in the page text
   * **2** highlighted if "Dota" is found in the page url
-  * **3+** included for expansion, for the time being they will behave like 2
 
 ```case_sensitive``` (Default: ```false```) whether the term should match case with the keyword in the keyword dictionary.
 

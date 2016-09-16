@@ -147,7 +147,12 @@
 .DotaTooltip .abilityIcon {
 	float:left;
 	height: 4.666em;
+  overflow: hidden;
   margin-right: 1.5em;
+}
+.DotaTooltip .abilityIcon img {
+	height: 100% !important;
+  width: auto !important;
 }
 /* ABILITY: name */
 .DotaTooltip .abilityName {

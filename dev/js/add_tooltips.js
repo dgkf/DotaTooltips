@@ -10,7 +10,14 @@ var DEBUG = true;
 function log(input) { console.log(_EXTENSION_CONSOLE_NAME, input); } // small logging helper
 
 // try to load a saved version of the heropedia data. If it doesn't exist or it's too old, get a new copy and save it in local storage. Also builds a dictionary of keywords and their contents' location in the heropedia
-chrome.storage.local.get(["heropedia", "dotakeywords", "_LANGUAGE", "_UPDATE_PERIOD", "_NEEDS_UPDATE", "_DEVMODE"], function(data) {
+chrome.storage.local.get(
+["heropedia",
+ "dotakeywords",
+ "_LANGUAGE",
+ "_UPDATE_PERIOD",
+ "_NEEDS_UPDATE",
+ "_DEVMODE"],
+function(data) {
   var LANGUAGE = (data._LANGUAGE === undefined ? 'english' : data._LANGUAGE);
   var UPDATE_PERIOD = (data._UPDATE_PERIOD === undefined ? 1 : data._UPDATE_PERIOD);
   DEBUG = DEBUG || (data._DEVMODE === undefined ? false : true);
@@ -46,6 +53,8 @@ chrome.storage.local.get(["heropedia", "dotakeywords", "_LANGUAGE", "_UPDATE_PER
 function modifyWebpage() {
   // load our local copy of the heropedia
   chrome.storage.local.get(["heropedia", "dotakeywords", "_BASE_FONT_SIZE", "_BASE_KEYWORD_SPECIFICITY"], function(data) {
+    console.log(data._BASE_FONT_SIZE);
+
     // build a monster regex query to match for any of the keywords
     var dota_keywords_regex = {
       case_sensitive: new RegExp('\\b('+Object.keys(data.dotakeywords)
@@ -86,26 +95,25 @@ function modifyWebpage() {
     // tooltip construction and callbacks
     function buildTooltipElements() {
       // create divs as placeholders for the tooltips
-      for (var k = 0, key; k < Object.keys(data.heropedia.data).length; k++) {
+      for (var k = 0, key, newDiv; k < Object.keys(data.heropedia.data).length; k++) {
         key = Object.keys(data.heropedia.data)[k].replace(/data$/gi, "");
-        $("body").append(
-          $('<div class="DotaTooltip DotaFont DotaTooltip_'+key+'">')
-          .load(chrome.extension.getURL("/html/tooltips/"+key+".html")));
+        $.get(chrome.extension.getURL("/html/tooltips/"+key+".html"), function(divHTML) {
+          newDiv = jQuery.parseHTML(divHTML);
+          $(newDiv).css({"font-size": (data._BASE_FONT_SIZE !== undefined ? data._BASE_FONT_SIZE.toString() + "px" : "11px")});
+          $("body").append(newDiv);
+        }, "html");
       }
-
-      // update the font size
-      $(".DotaTooltip").css({"font-size": (data._BASE_FONT_SIZE !== undefined ? data._BASE_FONT_SIZE.toString() + "px" : "11px")});
 
       // associate callbacks for hover actions
       $(".DotaTooltips").hover(
         // function to call on enter
         function(event) {
-          var keyword_sensitivity = parseInt(event.target.attributes.spec.nodeValue) +
-                                    parseInt(event.target.attributes.specmod.nodeValue) +
-                                    parseInt(event.target.attributes.specbase.nodeValue);
+          var keyword_sensitivity = parseInt(event.target.attributes.spec.value) +
+                                    parseInt(event.target.attributes.specmod.value) +
+                                    parseInt(event.target.attributes.specbase.value);
 
           if (keyword_sensitivity <= 0) {
-            var dataLocation = event.target.attributes.loc.nodeValue.split(".");
+            var dataLocation = event.target.attributes.loc.value.split(".");
             var tipProperties = getPropertyFromLocation(dataLocation, data.heropedia.data);
             var tipDiv = $("div.DotaTooltip_"+dataLocation[0].replace(/data$/gi, ""));
             tipProperties.objname = dataLocation[dataLocation.length-1];
@@ -132,7 +140,7 @@ function modifyWebpage() {
             // e.g. <span linked-text="[[a.a]] + [[a.b]]"></span> will become
             //      <span linked-text="[[a.a]] + [[a.b]]">1 + 2</span>
             // for tip_properties = {a: {a: 1, b: 2}};
-            value = $(this)[0].attributes.item(a).nodeValue.replace(
+            value = $(this)[0].attributes.item(a).value.replace(
               /\[\[([^\]]*)]]/g,
               function(match) {
                 return getPropertyFromLocation(
@@ -307,6 +315,8 @@ function updateHeropedia(LANGUAGE, callback) {
   $.getJSON(_HEROPEDIA_BASE_LINK + (LANGUAGE === undefined ? 'english' : LANGUAGE), function(data) {
     // update local copy of heropedia
     chrome.storage.local.set( {"heropedia": {"data": data, "lastUpdate": (new Date()).toJSON()}} );
+    chrome.storage.local.get(['heropedia'], function(data) { console.log(data); });
+    console.log('updating!');
 
     // update local keyword dictionary from updated heropedia and custom keywords
     $.getJSON(chrome.extension.getURL("/json/custom_keywords.json"), function(custom_keywords) {

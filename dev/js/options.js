@@ -37,13 +37,12 @@ $(document).ready(function() {
 
       // update scaling of tooltip divs on current page
       chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        chrome.tabs.executeScript(tabs[0].id, {file: "js/update_tab_settings.js"});
+        chrome.tabs.executeScript(tabs[0].id, {file: "/js/update_tab_settings.js"});
       });
     });
 
     // keyword specificity
     $(".DotaTooltipOptions > .KeywordSpecificity").on("input change", function(event) {
-      console.log('here');
       var newval = parseInt(event.target.value);
 
       switch(newval) {
