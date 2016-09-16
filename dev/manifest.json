@@ -11,12 +11,10 @@
     "128": "icons/dotatooltips_icon_128.png"
   },
 
-  "content_security_policy": "script-src 'self'; object-src 'self' 'https://www.dota2.com/'; img-src 'self' 'http://cdn.dota2.com/'",
-
   "permissions": [
     "storage",
     "activeTab",
-    "http://cdn.dota2.com/*",
+    "http://cdn.dota2.com/",
     "https://www.dota2.com/*"
   ],
 
