@@ -6,7 +6,7 @@
 
 var _EXTENSION_CONSOLE_NAME = "DOTATOOLTIPS:"
 var _HEROPEDIA_BASE_LINK = "https://www.dota2.com/jsfeed/heropediadata?feeds=itemdata,abilitydata,herodata&l=";
-var DEBUG = true;
+var DEBUG = false;
 function log(input) { console.log(_EXTENSION_CONSOLE_NAME, input); } // small logging helper
 
 // try to load a saved version of the heropedia data. If it doesn't exist or it's too old, get a new copy and save it in local storage. Also builds a dictionary of keywords and their contents' location in the heropedia
@@ -53,8 +53,6 @@ function(data) {
 function modifyWebpage() {
   // load our local copy of the heropedia
   chrome.storage.local.get(["heropedia", "dotakeywords", "_BASE_FONT_SIZE", "_BASE_KEYWORD_SPECIFICITY"], function(data) {
-    console.log(data._BASE_FONT_SIZE);
-
     // build a monster regex query to match for any of the keywords
     var dota_keywords_regex = {
       case_sensitive: new RegExp('\\b('+Object.keys(data.dotakeywords)
@@ -312,25 +310,30 @@ function modifyWebpage() {
 
 // helper function to update our local copy of the heropedia
 function updateHeropedia(LANGUAGE, callback) {
-  $.getJSON(_HEROPEDIA_BASE_LINK + (LANGUAGE === undefined ? 'english' : LANGUAGE), function(data) {
+  var heropedia_req = new XMLHttpRequest();
+  heropedia_req.addEventListener("load", function(req_data) {
     // update local copy of heropedia
-    chrome.storage.local.set( {"heropedia": {"data": data, "lastUpdate": (new Date()).toJSON()}} );
-    chrome.storage.local.get(['heropedia'], function(data) { console.log(data); });
-    console.log('updating!');
+    chrome.storage.local.set(
+      {"heropedia": {"data": jQuery.parseJSON(req_data.target.responseText),
+                     "lastUpdate": (new Date()).toJSON()} }
+    );
 
-    // update local keyword dictionary from updated heropedia and custom keywords
-    $.getJSON(chrome.extension.getURL("/json/custom_keywords.json"), function(custom_keywords) {
+    chrome.storage.local.get(['heropedia'], function(data) {
+      // update local keyword dictionary from updated heropedia and custom keywords
+      $.getJSON(chrome.extension.getURL("/json/custom_keywords.json"), function(custom_keywords) {
+        chrome.storage.local.set(
+          {"dotakeywords": buildDotaKeywordDictionary(custom_keywords[(LANGUAGE === undefined ? 'english' : LANGUAGE)], data.heropedia.data)},
+          finished_callback
+        );
+      });
 
-      chrome.storage.local.set(
-        {"dotakeywords": buildDotaKeywordDictionary(custom_keywords[(LANGUAGE === undefined ? 'english' : LANGUAGE)], data)},
-        finished_callback
-      );
+      function finished_callback() {
+        if (callback !== undefined) callback();
+      }
     });
-
-    function finished_callback() {
-      if (callback !== undefined) callback();
-    }
   });
+  heropedia_req.open("GET", _HEROPEDIA_BASE_LINK + (LANGUAGE === undefined ? 'english' : LANGUAGE));
+  heropedia_req.send();
 }
 
 // builds a dictionary of { keyword: {location: [String], priority: int, case_sensitive: Bool }}
