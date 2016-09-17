@@ -1,7 +1,7 @@
 var _HEROPEDIA_BASE_LINK = "https://www.dota2.com/jsfeed/heropediadata?feeds=itemdata,abilitydata,herodata&l=";
 function log(input, override) {
   chrome.storage.local.get(['_DEVMODE'], function(data) {
-    if (data._DEVMODE || override) console.log("DOTATOOLTIPS:", input);
+    if (data._DEVMODE || override || true) console.log("DOTATOOLTIPS:", input);
   });
 }
 
@@ -31,7 +31,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
                              custom_keywords[(request.language === undefined ? 'english' : request.language)],
                              heropedia.data);
         // set it in local storage and trigger callback once all values have been updated
-        chrome.storage.local.set({"dotakeywords": dotakeywords}, sendResponse());
+        chrome.storage.local.set({"dotakeywords": dotakeywords}, function() { sendResponse(); });
         chrome.storage.local.set({"_NEEDS_UPDATE": false});
       });
     });
@@ -62,6 +62,13 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
     // return true so that the send response is sent asynchronously (once all values have been updated)
     return true;
+  }
+
+  // for updating active tab's keyword filtering and font size
+  else if (request.target == "updateActiveTab") {
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+      chrome.tabs.sendMessage(tabs[0].id, {target: "updateTab"});
+    });
   }
 
 });

@@ -35,12 +35,15 @@ $(document).ready(function() {
       var newval = parseInt(event.target.value);
       newval = Math.max(6, Math.min(30, newval));
       $(".DotaTooltipOptions .BaseFontSize").val(newval);
-      chrome.storage.local.set( {"_BASE_FONT_SIZE": newval} );
+    });
+    $(".DotaTooltipOptions .BaseFontSize").on("change", function(event) {
+      var newval = parseInt(event.target.value);
+      newval = Math.max(6, Math.min(30, newval));
       data._BASE_FONT_SIZE = newval;
-
-      // update scaling of tooltip divs on current page
-      chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        chrome.tabs.executeScript(tabs[0].id, {file: "/js/update_tab_settings.js"});
+      
+      chrome.storage.local.set( {"_BASE_FONT_SIZE": newval} , function() {
+        // update scaling of tooltip divs on current page
+        chrome.runtime.sendMessage({ target: "updateActiveTab" });
       });
     });
 
@@ -65,14 +68,15 @@ $(document).ready(function() {
           $(".KeywordSpecificityInfo").text("Dota everywhere!");
           break;
       }
-
+    });
+    $(".DotaTooltipOptions > .KeywordSpecificity").on("change", function(event) {
+      var newval = parseInt(event.target.value);
       newval = Math.max(-2, Math.min(2, newval));
-      chrome.storage.local.set( {"_BASE_KEYWORD_SPECIFICITY": newval} );
       data._BASE_KEYWORD_SPECIFICITY = newval;
 
-      // update specificity on current page
-      chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        chrome.tabs.executeScript(tabs[0].id, {file: "js/update_tab_settings.js"});
+      chrome.storage.local.set( {"_BASE_KEYWORD_SPECIFICITY": newval}, function() {
+        // update specificity on current page
+        chrome.runtime.sendMessage({ target: "updateActiveTab" });
       });
     });
     $(".DotaTooltipOptions > .KeywordSpecificity").hover(

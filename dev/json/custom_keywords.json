@@ -59,7 +59,6 @@
     "darkness": {"location": ["abilitydata", "night_stalker_darkness"], "specificity": 1, "case_sensitive": false},
     "void": {"location": ["abilitydata", "night_stalker_void"], "specificity": 1, "case_sensitive": false},
     "burrow": {"location": ["abilitydata", "nyx_assassin_burrow"], "specificity": 1, "case_sensitive": false},
-    "impale": {"location": ["abilitydata", "nyx_assassin_impale"], "specificity": 1, "case_sensitive": false},
     "ignite": {"location": ["abilitydata", "ogre_magi_ignite"], "specificity": 1, "case_sensitive": false},
     "purification": {"location": ["abilitydata", "omniknight_purification"], "specificity": 1, "case_sensitive": false},
     "repel": {"location": ["abilitydata", "omniknight_repel"], "specificity": 1, "case_sensitive": false},

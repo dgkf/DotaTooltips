@@ -4,7 +4,7 @@
  *
  */
 
-var DEBUG = false;
+var DEBUG = true;
 function log(input, override) { if (DEBUG || override) console.log("DOTATOOLTIPS:", input); } // small logging helper
 
 // try to load a saved version of the heropedia data. If it doesn't exist or it's too old, get a new copy and save it in local storage. Also builds a dictionary of keywords and their contents' location in the heropedia
@@ -89,9 +89,10 @@ function modifyWebpage() {
           Math.floor(Math.log10(pageData.uniqueKeywords.size) / Math.log10(5)) + " for the number of unique keywords found");
     log(pageData.keywordsFound.length + " Dota keywords found! (" + pageData.uniqueKeywords.size + " unique)", true);
 
-    // pass number of keywords found to background script to update icon
-    chrome.runtime.sendMessage({target: "updateBadgeText", text: pageData.keywordsFound.length.toString()});
-    if (pageData.keywordsFound.length > 0) buildTooltipElements();
+    if (pageData.keywordsFound.length > 0) {
+      updateTabFromSettings();
+      buildTooltipElements();
+    }
 
     // tooltip construction and callbacks
     function buildTooltipElements() {
@@ -310,3 +311,29 @@ function modifyWebpage() {
     }
   });
 }
+
+// update page font size and content filtering
+function updateTabFromSettings() {
+  chrome.storage.local.get(["_LANGUAGE", "_BASE_FONT_SIZE", "_BASE_KEYWORD_SPECIFICITY"], function(data) {
+    var visible_keywords_count = 0;
+
+    // update div font size
+    $("div.DotaTooltip").css({"font-size": (data._BASE_FONT_SIZE !== undefined ? data._BASE_FONT_SIZE : "12px")});
+
+    // update span base specificity and sum up all keywords which aren't filterd (sum spec <= 0)
+    $("span.DotaTooltips").each(function() {
+      if(data._BASE_KEYWORD_SPECIFICITY + parseInt($(this).attr("spec")) + parseInt($(this).attr("specmod")) <= 0) visible_keywords_count += 1;
+      $(this).attr("specbase", data._BASE_KEYWORD_SPECIFICITY.toString())
+    });
+
+    // send a message back to background script to update badge text
+    chrome.runtime.sendMessage({ target: "updateBadgeText", text: visible_keywords_count.toString() });
+  });
+}
+
+// listen for updating requests from the background script (relayed from options updates)
+chrome.runtime.onMessage.addListener(function(request, sender, sendMessage) {
+  if (request.target == "updateTab") {
+    updateTabFromSettings();
+  }
+});

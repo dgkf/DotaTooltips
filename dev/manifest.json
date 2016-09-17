@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Dota Tooltips",
-  "version": "0.0.1.4",
+  "version": "0.0.1.5",
   "description": "Popup text for Dota 2 related keywords.",
   "author": "github.com/dgkf",
 
@@ -17,7 +17,8 @@
   ],
 
   "background": {
-    "scripts": ["third_party_resources/js/jquery-3.1.0.min.js", "js/background.js"]
+    "scripts": ["third_party_resources/js/jquery-3.1.0.min.js", "js/background.js"],
+    "persistent": false
   },
 
   "browser_action": {
@@ -34,7 +35,7 @@
   "content_scripts": [
     {
       "matches": ["*://*/*"],
-      "js": ["third_party_resources/js/jquery-3.1.0.min.js", "js/add_tooltips.js", "js/update_tab_settings.js"],
+      "js": ["third_party_resources/js/jquery-3.1.0.min.js", "js/add_tooltips.js"],
       "css": ["css/style_custom.css"],
       "run_at": "document_end"
     }
