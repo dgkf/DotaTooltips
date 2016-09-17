@@ -4,9 +4,12 @@
  *
  */
 
-var DEBUG = true;
-function log(input, override) { if (DEBUG || override) console.log("DOTATOOLTIPS:", input); } // small logging helper
-
+var DEBUG = false;
+function log(input, override) {
+  chrome.storage.local.get(['_DEVMODE'], function(data) {
+    if (data._DEVMODE || DEBUG || override) console.log("DOTATOOLTIPS:", input);
+  });
+}
 // try to load a saved version of the heropedia data. If it doesn't exist or it's too old, get a new copy and save it in local storage. Also builds a dictionary of keywords and their contents' location in the heropedia
 chrome.storage.local.get(
 ["heropedia",
@@ -92,6 +95,9 @@ function modifyWebpage() {
     if (pageData.keywordsFound.length > 0) {
       updateTabFromSettings();
       buildTooltipElements();
+    } else {
+      // send a message back to background script to update badge text
+      chrome.runtime.sendMessage({ target: "updateBadgeText", text: "" });
     }
 
     // tooltip construction and callbacks
@@ -318,16 +324,18 @@ function updateTabFromSettings() {
     var visible_keywords_count = 0;
 
     // update div font size
-    $("div.DotaTooltip").css({"font-size": (data._BASE_FONT_SIZE !== undefined ? data._BASE_FONT_SIZE : "12px")});
+    $("div.DotaTooltip").css({"font-size": (data._BASE_FONT_SIZE !== undefined ? data._BASE_FONT_SIZE : "11px")});
 
     // update span base specificity and sum up all keywords which aren't filterd (sum spec <= 0)
     $("span.DotaTooltips").each(function() {
-      if(data._BASE_KEYWORD_SPECIFICITY + parseInt($(this).attr("spec")) + parseInt($(this).attr("specmod")) <= 0) visible_keywords_count += 1;
-      $(this).attr("specbase", data._BASE_KEYWORD_SPECIFICITY.toString())
+      if( (data._BASE_KEYWORD_SPECIFICITY === undefined ? 0 : data._BASE_KEYWORD_SPECIFICITY) +
+          parseInt($(this).attr("spec")) +
+          parseInt($(this).attr("specmod")) <= 0) visible_keywords_count += 1;
+      $(this).attr("specbase", data._BASE_KEYWORD_SPECIFICITY === undefined ? 0 : data._BASE_KEYWORD_SPECIFICITY.toString())
     });
 
     // send a message back to background script to update badge text
-    chrome.runtime.sendMessage({ target: "updateBadgeText", text: visible_keywords_count.toString() });
+    chrome.runtime.sendMessage({ target: "updateBadgeText", text: (visible_keywords_count > 0 ? visible_keywords_count.toString() : "") });
   });
 }
 

@@ -1,5 +1,5 @@
 [
-  {"platform": "firefox", "extension": "xpi", "version": "0.0.1.0"},
-  {"platform": "firefox", "extension": "zip", "version": "0.0.1.0"},
-  {"platform": "chrome", "extension": "zip", "version": "0.0.1.5"}
+  {"platform": "firefox", "extension": "xpi", "version": "0.0.1.1"},
+  {"platform": "firefox", "extension": "zip", "version": "0.0.1.1"},
+  {"platform": "chrome", "extension": "zip", "version": "0.0.1.6"}
 ]

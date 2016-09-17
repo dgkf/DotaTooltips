@@ -40,7 +40,7 @@ $(document).ready(function() {
       var newval = parseInt(event.target.value);
       newval = Math.max(6, Math.min(30, newval));
       data._BASE_FONT_SIZE = newval;
-      
+
       chrome.storage.local.set( {"_BASE_FONT_SIZE": newval} , function() {
         // update scaling of tooltip divs on current page
         chrome.runtime.sendMessage({ target: "updateActiveTab" });

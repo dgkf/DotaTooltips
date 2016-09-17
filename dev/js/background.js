@@ -1,7 +1,7 @@
 var _HEROPEDIA_BASE_LINK = "https://www.dota2.com/jsfeed/heropediadata?feeds=itemdata,abilitydata,herodata&l=";
 function log(input, override) {
   chrome.storage.local.get(['_DEVMODE'], function(data) {
-    if (data._DEVMODE || override || true) console.log("DOTATOOLTIPS:", input);
+    if (data._DEVMODE || override) console.log("DOTATOOLTIPS:", input);
   });
 }
 
