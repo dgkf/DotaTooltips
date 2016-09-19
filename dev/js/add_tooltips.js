@@ -81,7 +81,7 @@ function modifyWebpage() {
     pageData.dotaFoundInURL = !!document.URL.match(/dota/gi);
     pageData.specificity =  -(pageData.dotaFoundInURL ? 1 : 0) -
                              (pageData.dotaFoundInText ? 1 : 0) -
-                             Math.floor(Math.log10(pageData.uniqueKeywords.size) / Math.log10(5));
+                             ((Math.log10(pageData.uniqueKeywords.size / pageData.wordCount) / Math.log10(3)) + 1/Math.log10(3) * 3);
 
     // update elements with specificity modifier (calculated above)
     $("span.DotaTooltips").attr("specmod", pageData.specificity);
@@ -89,7 +89,7 @@ function modifyWebpage() {
     log("Page Dota specificity rated at " + (-1*pageData.specificity) + "\n  " +
           (pageData.dotaFoundInURL ? "1 for 'Dota' in the url\n  " : "0 for 'Dota' not found in url\n  ") +
           (pageData.dotaFoundInText ? "1 for 'Dota' in page text\n  " : "0 for 'Dota' not found in text\n  ") +
-          Math.floor(Math.log10(pageData.uniqueKeywords.size) / Math.log10(5)) + " for the number of unique keywords found");
+          ((Math.log10(pageData.uniqueKeywords.size / pageData.wordCount) / Math.log10(3)) + 1/Math.log10(3) * 3) + " for the number of unique keywords found");
     log(pageData.keywordsFound.length + " Dota keywords found! (" + pageData.uniqueKeywords.size + " unique)", true);
 
     if (pageData.keywordsFound.length > 0) {
@@ -242,7 +242,7 @@ function modifyWebpage() {
 
     // html text element manipulation
     function traverse(node) {
-      var child, next, keywordsFound = [], dotaFoundInText = false;
+      var child, next, keywordsFound = [], dotaFoundInText = false, wordCount = 0;
 
       // make sure we're not editing webpage scripts - especially that pesky 'Return' skill
       if (node.tagName != "SCRIPT") {
@@ -256,6 +256,7 @@ function modifyWebpage() {
                     nodeData = traverse(child);
                     keywordsFound = keywordsFound.concat(nodeData.keywordsFound);
                     dotaFoundInText = dotaFoundInText || nodeData.dotaFoundInText;
+                    wordCount += nodeData.wordCount;
                     child = next;
                 }
                 break;
@@ -263,11 +264,15 @@ function modifyWebpage() {
             case 3: // Text node
                 keywordsFound = keywordsFound.concat(injectSpansForKeywords(node));
                 dotaFoundInText = dotaFoundInText || !!node.nodeValue.match(/\bdota\b/gi);
+                matchSpaces = node.nodeValue.match(/[ \n\r]+\b/gi);
+                wordCount += (matchSpaces !== null ? matchSpaces.length + 1: (node.nodeValue.length > 0 ? 1 : 0));
                 break;
         }
       }
+
       return {"keywordsFound": keywordsFound,
-              "dotaFoundInText": dotaFoundInText};
+              "dotaFoundInText": dotaFoundInText,
+              "wordCount": wordCount};
     }
     function injectSpansForKeywords(textNode) {
       var keyword, match, keywords = [];

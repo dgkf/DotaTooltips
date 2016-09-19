@@ -23,12 +23,20 @@ Info you'll need:
 * How specific to Dota the keyword is (0 is specific to Dota)
 * Whether the keyword is case sensitive
 
-#### 2. Save my Stylesheets!
+#### 2. File bug reports!
+Feel free to add issues to the stack. Finding bugs is the first piece of the puzzle!
+
+#### 3. Save my Stylesheets!
 The world of web development is a dark and mysterious place. Making things look pretty is not my expertise, and making things that look pretty with css on multiple browsers adds another layer of complexity to an area I already find difficult. If you want to contribute and you have any familiarity with this line of work, I'd greatly appreciate the help.
 
 There are two stylesheets that are used:
+
 1. [```options.css```](https://github.com/dgkf/DotaTooltips/blob/master/dev/css/options.css), which formats the icon popup options and the options menu in the extensions settings in your browser.
 2. [```style_custom.css```](https://github.com/dgkf/DotaTooltips/blob/master/dev/css/style_custom.css), which formats the tooltips. There is also a ```style_valvefaithful.css``` tucked away in there that is unused, but nice to refer back to how these are formatted on [dota2.com](https://www.dota2.com).
+
+#### 4. Help with the code!
+If you'd like to help build out the extension, your input is always welcome. My JavaScript background is quite minimal, so getting more eyes on my work for review would be wonderful and having the extra help when adding features would be a great help.
+
 
 ## <a name="DevMode"></a>Enabling Dev Mode
 Open the extension options or popup window and hover your cursor in the top left corner for 10 seconds. You'll now get added info logged to the JavaScript console in your browser to help debugging and troubleshooting.
