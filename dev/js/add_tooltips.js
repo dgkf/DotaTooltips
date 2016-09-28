@@ -104,11 +104,11 @@ function modifyWebpage() {
       // create divs as placeholders for the tooltips
       for (var k = 0, key, newDiv; k < Object.keys(data.heropedia.data).length; k++) {
         key = Object.keys(data.heropedia.data)[k].replace(/data$/gi, "");
-        $.get(chrome.extension.getURL("/html/tooltips/"+key+".html"), function(divHTML) {
-          newDiv = $.parseHTML(divHTML, false); // disallow script passing in html insertion
-          $(newDiv).css({"font-size": (data._BASE_FONT_SIZE !== undefined ? data._BASE_FONT_SIZE.toString() + "px" : "11px")});
+        $.get(chrome.extension.getURL("/json/tooltips/"+key+".json"), function(divJSON) {
+          newDiv = jsonToDOM($.parseJSON(divJSON), document, {});
+          newDiv.style["font-size"] = (data._BASE_FONT_SIZE !== undefined ? data._BASE_FONT_SIZE.toString() + "px" : "11px");
           $("body").append(newDiv);
-        }, "html");
+        });
       }
 
       // associate callbacks for hover actions

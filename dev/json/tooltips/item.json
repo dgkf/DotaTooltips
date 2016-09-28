@@ -1,0 +1,22 @@
+["html:div", {"class":"DotaTooltip DotaFont DotaTooltip_item"},
+  ["html:div", {"class":"itemIcon"},
+    ["html:img", {"src":"","border":"0","linked-src":"https://cdn.steamstatic.com/apps/dota2/images/items/[[img]]"}]
+  ],
+  ["html:div", {"class":"itemName"},
+    ["html:div", {"linked-text":"[[dname]]","linked-class":"quality_[[qual]]"}]
+  ],
+  ["html:div", {"class":"goldIcon"},
+    ["html:img", {"src":"https://cdn.steamstatic.com/apps/dota2/images/tooltips/gold.png","width":"25","height":"17","border":"0"}]
+  ],
+  ["html:div", {"class":"goldCost","linked-text":"[[cost]]"}],
+  ["html:br", {"clear":"left"}],
+  ["html:div", {"class":"description","linked-html":"[[desc]]"}],
+  ["html:div", {"class":"attribs","linked-html":"[[attrib]]"}],
+  ["html:div", {"class":"cooldownMana"},
+    ["html:img", {"alt":"Cooldown","title":"Cooldown","class":"cooldownImg","src":"https://cdn.steamstatic.com/apps/dota2/images/tooltips/cooldown.png","width":"22","height":"22","border":"0"}],
+    ["html:span", {"linked-text":"[[cd]]"}],
+    ["html:br", {"clear":"left"}],
+    ["html:br", {"clear":"left"}]
+  ],
+  ["html:div", {"class":"lore","linked-text":"[[lore]]"}]
+]

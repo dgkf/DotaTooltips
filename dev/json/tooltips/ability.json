@@ -1,0 +1,17 @@
+["html:div", {"class":"DotaTooltip DotaFont DotaTooltip_ability"},
+  ["html:div", {"class":"abilityIcon"},
+    ["html:img", {"src":"","width":"56","height":"56","linked-src":"https://cdn.steamstatic.com/apps/dota2/images/abilities/[[objname]]_hp2.png"}]
+  ],
+  ["html:br", {}],
+  ["html:div", {"class":"abilityName","linked-text":"[[dname]]"}],
+  ["html:br", {"clear":"left"}],
+  ["html:div", {"class":"abilityHR1"}],
+  ["html:div", {"class":"abilityTarget","linked-html":"[[affects]]"}],
+  ["html:div", {"class":"abilityHR2"}],
+  ["html:div", {"class":"abilityDesc","linked-html":"[[desc]]"}],
+  ["html:div", {"class":"abilityNotes","linked-text":"[[notes]]"}],
+  ["html:div", {"class":"abilityDmg","linked-html":"[[dmg]]"}],
+  ["html:div", {"class":"abilityAttrib","linked-html":"[[attrib]]"}],
+  ["html:div", {"class":"abilityCMB","linked-html":"[[cmb]]"}],
+  ["html:div", {"class":"lore","linked-text":"[[lore]]"}]
+]
