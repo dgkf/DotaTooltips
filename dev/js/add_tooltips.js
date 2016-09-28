@@ -27,7 +27,7 @@ function(data) {
   log('update period set to: ' + UPDATE_PERIOD + '/day.');
 
   var updateThreshold = new Date();
-  updateThreshold.setTime(updateThreshold.getTime() - 1*24*60*60*1000/(UPDATE_PERIOD === undefined ? 1 : UPDATE_PERIOD));
+  updateThreshold.setTime(updateThreshold.getTime() - 1*24*60*60*1000/1000000/(UPDATE_PERIOD === undefined ? 1 : UPDATE_PERIOD));
 
   // check the age of our local copy of the heropedia and update it if it's over a day old
   if (data.heropedia === undefined || data.dotakeywords === undefined) {
@@ -158,7 +158,10 @@ function modifyWebpage() {
                               tipProperties);
                   });
                 // securely reconstruct DOM elements from JSON (originally constructed from parsed from html strings.)
-                $(this).empty()[0].appendChild(jsonToDOM(value, document, {}));
+                if (Array.isArray(value))
+                  $(this).empty()[0].appendChild(jsonToDOM(value, document, {}));
+                else
+                  $(this).text(value);
                 break;
 
               default:
@@ -168,8 +171,9 @@ function modifyWebpage() {
                              match.substring(2, match.length-2).split("."),
                              tipProperties);
                   });
-                if (attr == "text") $(this).text(value);
-                else $(this).attr(attr, value);
+                if (value !== "")
+                  if (attr == "text") $(this).text(value);
+                  else $(this).attr(attr, value);
                 break;
             }
           }
@@ -372,10 +376,8 @@ function jsonToDOM(jsonTemplate, doc, nodes) {
 
     // Note that 'elemNameOrArray' is: either the full element name (eg. [html:]div) or an array of elements in JSON notation
     function tag(elemNameOrArray, elemAttr) {
-
         // Array of elements?  Parse each one...
         if (Array.isArray(elemNameOrArray)) {
-            console.log('arguments:', arguments);
             var frag = doc.createDocumentFragment();
             Array.forEach(arguments, function(thisElem) {
                 frag.appendChild(tag.apply(null, thisElem));

@@ -150,7 +150,7 @@
     "serpent wards": {"location": ["abilitydata", "shadow_shaman_mass_serpent_ward"], "specificity": 0, "case_sensitive": false},
     "vortex": {"location": ["abilitydata", "storm_spirit_electric_vortex"], "specificity": 2, "case_sensitive": false},
     "psi trap": {"location": ["abilitydata", "templar_assassin_psioinc_trap"], "specificity": 0, "case_sensitive": false},
-    "roar": {"locaiton": ["abilitydata", "beastmaster_primal_roar"], "specificity": 2, "case_sensitive": false},
+    "roar": {"location": ["abilitydata", "beastmaster_primal_roar"], "specificity": 2, "case_sensitive": false},
 
     "abyssal": {"location": ["itemdata", "abyssal_blade"], "specificity": 0, "case_sensitive": false},
     "aether": {"location": ["itemdata", "aether_lens"], "specificity": 0, "case_sensitive": false},
@@ -204,6 +204,6 @@
     "aghs": {"location": ["itemdata", "ultimate_scepter"], "specificity": 0, "case_sensitive": false},
     "aghanim's": {"location": ["itemdata", "ultimate_scepter"], "specificity": 0, "case_sensitive": false},
     "veil": {"location": ["itemdata", "veil_of_discord"], "specificity": 1, "case_sensitive": false},
-    "salve": {"location": ["itemdata", "salve"], "specificity": 1, "case_sensitive": false}
+    "salve": {"location": ["itemdata", "flask"], "specificity": 1, "case_sensitive": false}
   }
 }

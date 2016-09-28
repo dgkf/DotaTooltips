@@ -8,7 +8,7 @@
   ["html:div", {"class":"abilityHR1"}],
   ["html:div", {"class":"abilityTarget","linked-html":"[[affects]]"}],
   ["html:div", {"class":"abilityHR2"}],
-  ["html:div", {"class":"abilityDesc","linked-html":"[[desc]]"}],
+  ["html:div", {"class":"abilityDesc","linked-text":"[[desc]]"}],
   ["html:div", {"class":"abilityNotes","linked-text":"[[notes]]"}],
   ["html:div", {"class":"abilityDmg","linked-html":"[[dmg]]"}],
   ["html:div", {"class":"abilityAttrib","linked-html":"[[attrib]]"}],
