@@ -88,7 +88,6 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
 });
 
-
 // helper function for quick-and-dirty test for html in heropedia (html is very mundane, I think this catch-all should be good enough)
 // source: http://stackoverflow.com/questions/15458876/check-if-a-string-is-html-or-not#15458987
 var isHTML = RegExp.prototype.test.bind(/(<([^>]+)>)/i);
