@@ -30,10 +30,17 @@
   background: linear-gradient(top, #2e2e2d, #000000);
   transition: visibility 0.2s, opacity 0.2s linear;
 }
+.DotaTooltip br + br {
+  display: block;
+  content: "";
+  margin: 0.25em 0;
+  height: 0.25em;
+}
 .DotaTooltip img {
   width: auto;
   height: 100%;
 }
+
 
 /* Font colors */
 .DotaTooltip .quality_rare {
@@ -170,8 +177,8 @@
 	height: 0.166em;
 	width: 100%;
 	margin: 0.6em 0;
-	background: url( 'https://cdn.steamstatic.com/apps/dota2/images/tooltips/abil_hr_1.png' ) repeat-x;
-  background-color: #282828;
+	/* background: url( 'https://cdn.steamstatic.com/apps/dota2/images/tooltips/abil_hr_1.png' ) repeat-x; */
+  background-color: #626262;
 }
 /* ABILITY: targetting */
 .DotaTooltip .abilityTarget {

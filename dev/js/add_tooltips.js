@@ -4,7 +4,7 @@
  *
  */
 
-var DEBUG = false;
+var DEBUG = true;
 function log(input, override) {
   chrome.storage.local.get(['_DEVMODE'], function(data) {
     if (data._DEVMODE || DEBUG || override) console.log("DOTATOOLTIPS:", input);
@@ -27,7 +27,7 @@ function(data) {
   log('update period set to: ' + UPDATE_PERIOD + '/day.');
 
   var updateThreshold = new Date();
-  updateThreshold.setDate(updateThreshold.getDate() - 1/(UPDATE_PERIOD === undefined ? 1 : UPDATE_PERIOD));
+  updateThreshold.setTime(updateThreshold.getTime() - 1*24*60*60*1000/(UPDATE_PERIOD === undefined ? 1 : UPDATE_PERIOD));
 
   // check the age of our local copy of the heropedia and update it if it's over a day old
   if (data.heropedia === undefined || data.dotakeywords === undefined) {
@@ -38,7 +38,6 @@ function(data) {
     );
   } else {
     modifyWebpage();
-
     if (data.heropedia.lastUpdate === undefined ||
         new Date(data.heropedia.lastUpdate) < updateThreshold) {
       log("Local Heropedia too old (from "+data.heropedia.lastUpdate+")! Updating now.");
@@ -59,15 +58,15 @@ function modifyWebpage() {
     // build a monster regex query to match for any of the keywords
     var dota_keywords_regex = {
       case_sensitive: Object.keys(data.dotakeywords)
-                      .map(function(k) { return data.dotakeywords[k].case_sensitive ? k : undefined })
+                      .map( function(k) { return (data.dotakeywords[k].case_sensitive ? (data.dotakeywords[k].keyregex ? k : escapeRegExp(k)) : undefined) } )
                       .filter(function(k) { return k !== undefined; })
-                      .map(function(k) { return data.dotakeywords[k].keyregex ? k : escapeRegExp(k) })
                       .join('|'),
       case_insensitive: Object.keys(data.dotakeywords)
-                      .map(function(k) { return !data.dotakeywords[k].case_sensitive ? k : undefined })
+                      .map( function(k) { return (data.dotakeywords[k].case_sensitive ? undefined : (data.dotakeywords[k].keyregex ? k : escapeRegExp(k))) } )
                       .filter(function(k) { return k !== undefined; })
-                      .map(function(k) { return data.dotakeywords[k].keyregex ? k : escapeRegExp(k) })
-                      .join('|') };
+                      .join('|')
+    };
+
     // handle case where no dictionary entries exist
     dota_keywords_regex.case_sensitive = (dota_keywords_regex.case_sensitive == "" ? undefined : new RegExp('\\b('+dota_keywords_regex.case_sensitive+')\\b', ""));
     dota_keywords_regex.case_insensitive = (dota_keywords_regex.case_insensitive == "" ? undefined : new RegExp('\\b('+dota_keywords_regex.case_insensitive+')\\b', "i"));
@@ -106,7 +105,7 @@ function modifyWebpage() {
       for (var k = 0, key, newDiv; k < Object.keys(data.heropedia.data).length; k++) {
         key = Object.keys(data.heropedia.data)[k].replace(/data$/gi, "");
         $.get(chrome.extension.getURL("/html/tooltips/"+key+".html"), function(divHTML) {
-          newDiv = jQuery.parseHTML(divHTML);
+          newDiv = $.parseHTML(divHTML, false); // disallow script passing in html insertion
           $(newDiv).css({"font-size": (data._BASE_FONT_SIZE !== undefined ? data._BASE_FONT_SIZE.toString() + "px" : "11px")});
           $("body").append(newDiv);
         }, "html");
@@ -132,7 +131,7 @@ function modifyWebpage() {
         },
         // function to call on leave
         function(event) {
-          hideTooltips(event)
+            hideTooltips(event)
         }
       );
     }
@@ -148,26 +147,30 @@ function modifyWebpage() {
             // e.g. <span linked-text="[[a.a]] + [[a.b]]"></span> will become
             //      <span linked-text="[[a.a]] + [[a.b]]">1 + 2</span>
             // for tip_properties = {a: {a: 1, b: 2}};
-            value = $(this)[0].attributes.item(a).value.replace(
-              /\[\[([^\]]*)]]/g,
-              function(match) {
-                return getPropertyFromLocation(
-                         match.substring(2, match.length-2).split("."),
-                         tipProperties);
-              });
+            var value = "";
+            switch (attr) {
+              case "html":
+                $(this)[0].attributes.item(a).value.replace(
+                  /\[\[([^\]]*)]]/g,
+                  function(match) {
+                    value = getPropertyFromLocation(
+                              match.substring(2, match.length-2).split("."),
+                              tipProperties);
+                  });
+                // securely reconstruct DOM elements from JSON (originally constructed from parsed from html strings.)
+                $(this).empty()[0].appendChild(jsonToDOM(value, document, {}));
+                break;
 
-            // update html elements based on value
-            // if the element attribute is 'text' update the inner html
-            // otherwise update the attribute (e.g. linked-class will update class attribute)
-            if (value !== undefined) {
-              switch (attr) {
-                case "text":
-                  $(this).html(value);
-                  break;
-                default:
-                  $(this).attr(attr, value);
-                  break;
-              }
+              default:
+                value = $(this)[0].attributes.item(a).value.replace(/\[\[([^\]]*)]]/g,
+                  function(match) {
+                    return getPropertyFromLocation(
+                             match.substring(2, match.length-2).split("."),
+                             tipProperties);
+                  });
+                if (attr == "text") $(this).text(value);
+                else $(this).attr(attr, value);
+                break;
             }
           }
         }
@@ -350,3 +353,72 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendMessage) {
     updateTabFromSettings();
   }
 });
+
+
+
+
+
+// Mozilla solution for loading html from json object
+jsonToDOM.namespaces = {
+    html: "http://www.w3.org/1999/xhtml",
+    xul: "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+};
+jsonToDOM.defaultNamespace = jsonToDOM.namespaces.html;
+function jsonToDOM(jsonTemplate, doc, nodes) {
+    function namespace(name) {
+        var reElemNameParts = /^(?:(.*):)?(.*)$/.exec(name);
+        return { namespace: jsonToDOM.namespaces[reElemNameParts[1]], shortName: reElemNameParts[2] };
+    }
+
+    // Note that 'elemNameOrArray' is: either the full element name (eg. [html:]div) or an array of elements in JSON notation
+    function tag(elemNameOrArray, elemAttr) {
+
+        // Array of elements?  Parse each one...
+        if (Array.isArray(elemNameOrArray)) {
+            console.log('arguments:', arguments);
+            var frag = doc.createDocumentFragment();
+            Array.forEach(arguments, function(thisElem) {
+                frag.appendChild(tag.apply(null, thisElem));
+            });
+            return frag;
+        }
+
+        // Single element? Parse element namespace prefix (if none exists, default to defaultNamespace), and create element
+        var elemNs = namespace(elemNameOrArray);
+        var elem = doc.createElementNS(elemNs.namespace || jsonToDOM.defaultNamespace, elemNs.shortName);
+
+        // Set element's attributes and/or callback functions (eg. onclick)
+        for (var key in elemAttr) {
+            var val = elemAttr[key];
+            if (nodes && key == "key") {
+                nodes[val] = elem;
+                continue;
+            }
+
+            var attrNs = namespace(key);
+            if (typeof val == "function") {
+                // Special case for function attributes; don't just add them as 'on...' attributes, but as events, using addEventListener
+                elem.addEventListener(key.replace(/^on/, ""), val, false);
+            }
+            else {
+                // Note that the default namespace for XML attributes is, and should be, blank (ie. they're not in any namespace)
+                elem.setAttributeNS(attrNs.namespace || "", attrNs.shortName, val);
+            }
+        }
+
+        // Create and append this element's children
+        var childElems = Array.prototype.slice.call(arguments, 2);
+        childElems.forEach(function(childElem) {
+            if (childElem != null) {
+                elem.appendChild(
+                    childElem instanceof doc.defaultView.Node ? childElem :
+                        Array.isArray(childElem) ? tag.apply(null, childElem) :
+                            doc.createTextNode(childElem));
+            }
+        });
+
+        return elem;
+    }
+
+    return tag.apply(null, jsonTemplate);
+}
