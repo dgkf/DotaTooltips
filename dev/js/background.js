@@ -20,7 +20,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     var heropedia_req = new XMLHttpRequest();
     heropedia_req.addEventListener("load", function(req_data) {
       // build heropedia from request - any html strings are converted to JSON objects for secure reconstruction
-      var heropedia = { "data": sterilizeJSONnestedHTML(jQuery.parseJSON(req_data.target.responseText)),
+      var heropedia = { "data": sanitizeJSONnestedHTML(jQuery.parseJSON(req_data.target.responseText)),
                         "lastUpdate": (new Date()).toJSON()}
       // update local copy of heropedia
       chrome.storage.local.set({"heropedia": heropedia});
@@ -39,12 +39,12 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     heropedia_req.send();
 
     // convert html in heropedia to JSON objects that can be safely inserted into webpage DOM
-    function sterilizeJSONnestedHTML(obj) {
+    function sanitizeJSONnestedHTML(obj) {
       for (var k = 0; k < Object.keys(obj).length; k++) {
         if (typeof obj[Object.keys(obj)[k]] == 'object' &&
                    obj[Object.keys(obj)[k]] !== null &&
                    obj[Object.keys(obj)[k]] !== undefined) {
-          obj[Object.keys(obj)[k]] = sterilizeJSONnestedHTML(obj[Object.keys(obj)[k]]);
+          obj[Object.keys(obj)[k]] = sanitizeJSONnestedHTML(obj[Object.keys(obj)[k]]);
         } else if (isHTML(obj[Object.keys(obj)[k]])) {
           obj[Object.keys(obj)[k]] = HTMLtoJSON(obj[Object.keys(obj)[k]]);
         }

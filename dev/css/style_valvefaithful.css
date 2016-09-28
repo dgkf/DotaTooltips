@@ -1,3 +1,10 @@
+/*
+ * This file is unused for any styling
+ * Only used for reference to the original Valve styling
+ *
+ * I commented out remote image files from the original styling to avoid potential security issues
+ */
+
 span.DotaTooltips:hover {
   background: rgba(128,0,0,0.2);
 }
@@ -152,14 +159,14 @@ span.DotaTooltips:hover {
 	height:2px;
 	width: 100%;
 	margin:5px 0px;
-	background: url( 'http://cdn.dota2.com/apps/dota2/images/tooltips/abil_hr_1.png' ) no-repeat center center fixed;
+	/* background: url( 'http://cdn.dota2.com/apps/dota2/images/tooltips/abil_hr_1.png' ) no-repeat center center fixed; */
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
 }
 .DotaTooltip .abilityHR2 {
-	background:url( 'http://cdn.dota2.com/apps/dota2/images/tooltips/abil_hr_2.png' ); no-repeat center center fixed;
+  /* background: url( 'http://cdn.dota2.com/apps/dota2/images/tooltips/abil_hr_2.png' ) no-repeat center center fixed; */
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;

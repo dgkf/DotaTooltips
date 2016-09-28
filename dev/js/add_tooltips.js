@@ -4,7 +4,7 @@
  *
  */
 
-var DEBUG = true;
+var DEBUG = false;
 function log(input, override) {
   chrome.storage.local.get(['_DEVMODE'], function(data) {
     if (data._DEVMODE || DEBUG || override) console.log("DOTATOOLTIPS:", input);
@@ -58,13 +58,13 @@ function modifyWebpage() {
     // build a monster regex query to match for any of the keywords
     var dota_keywords_regex = {
       case_sensitive: Object.keys(data.dotakeywords)
-                      .map( function(k) { return (data.dotakeywords[k].case_sensitive ? (data.dotakeywords[k].keyregex ? k : escapeRegExp(k)) : undefined) } )
-                      .filter(function(k) { return k !== undefined; })
-                      .join('|'),
+        .map( function(k) { return (data.dotakeywords[k].case_sensitive ? (data.dotakeywords[k].keyregex ? k : escapeRegExp(k)) : undefined) } )
+        .filter( function(k) { return k !== undefined; })
+        .join('|'),
       case_insensitive: Object.keys(data.dotakeywords)
-                      .map( function(k) { return (data.dotakeywords[k].case_sensitive ? undefined : (data.dotakeywords[k].keyregex ? k : escapeRegExp(k))) } )
-                      .filter(function(k) { return k !== undefined; })
-                      .join('|')
+        .map( function(k) { return (data.dotakeywords[k].case_sensitive ? undefined : (data.dotakeywords[k].keyregex ? k : escapeRegExp(k))) } )
+        .filter(function(k) { return k !== undefined; })
+        .join('|')
     };
 
     // handle case where no dictionary entries exist
@@ -150,6 +150,7 @@ function modifyWebpage() {
             var value = "";
             switch (attr) {
               case "html":
+                // get the tipProperty corresponding to the matched property
                 $(this)[0].attributes.item(a).value.replace(
                   /\[\[([^\]]*)]]/g,
                   function(match) {
@@ -157,7 +158,7 @@ function modifyWebpage() {
                               match.substring(2, match.length-2).split("."),
                               tipProperties);
                   });
-                // securely reconstruct DOM elements from JSON (originally constructed from parsed from html strings.)
+                // securely reconstruct DOM elements from JSON (originally constructed from parsed html strings.)
                 if (Array.isArray(value))
                   $(this).empty()[0].appendChild(jsonToDOM(value, document, {}));
                 else
@@ -165,6 +166,7 @@ function modifyWebpage() {
                 break;
 
               default:
+                // string replace property value with placeholder in attribute
                 value = $(this)[0].attributes.item(a).value.replace(/\[\[([^\]]*)]]/g,
                   function(match) {
                     return getPropertyFromLocation(
@@ -254,26 +256,26 @@ function modifyWebpage() {
       // make sure we're not editing webpage scripts - especially that pesky 'Return' skill
       if (node.tagName != "SCRIPT") {
         switch ( node.nodeType ) {
-            case 1:  // Element
-            case 9:  // Document
-            case 11: // Document fragment
-                child = node.firstChild;
-                while (child) {
-                    next = child.nextSibling;
-                    nodeData = traverse(child);
-                    keywordsFound = keywordsFound.concat(nodeData.keywordsFound);
-                    dotaFoundInText = dotaFoundInText || nodeData.dotaFoundInText;
-                    wordCount += nodeData.wordCount;
-                    child = next;
-                }
-                break;
+          case 1:  // Element
+          case 9:  // Document
+          case 11: // Document fragment
+            child = node.firstChild;
+            while (child) {
+              next = child.nextSibling;
+              nodeData = traverse(child);
+              keywordsFound = keywordsFound.concat(nodeData.keywordsFound);
+              dotaFoundInText = dotaFoundInText || nodeData.dotaFoundInText;
+              wordCount += nodeData.wordCount;
+              child = next;
+            }
+            break;
 
-            case 3: // Text node
-                keywordsFound = keywordsFound.concat(injectSpansForKeywords(node));
-                dotaFoundInText = dotaFoundInText || !!node.nodeValue.match(/\bdota\b/gi);
-                matchSpaces = node.nodeValue.match(/[ \n\r]+\b/gi);
-                wordCount += (matchSpaces !== null ? matchSpaces.length + 1: (node.nodeValue.length > 0 ? 1 : 0));
-                break;
+          case 3: // Text node
+            keywordsFound = keywordsFound.concat(injectSpansForKeywords(node));
+            dotaFoundInText = dotaFoundInText || !!node.nodeValue.match(/\bdota\b/gi);
+            matchSpaces = node.nodeValue.match(/[ \n\r]+\b/gi);
+            wordCount += (matchSpaces !== null ? matchSpaces.length + 1: (node.nodeValue.length > 0 ? 1 : 0));
+            break;
         }
       }
 
@@ -369,58 +371,58 @@ jsonToDOM.namespaces = {
 };
 jsonToDOM.defaultNamespace = jsonToDOM.namespaces.html;
 function jsonToDOM(jsonTemplate, doc, nodes) {
-    function namespace(name) {
-        var reElemNameParts = /^(?:(.*):)?(.*)$/.exec(name);
-        return { namespace: jsonToDOM.namespaces[reElemNameParts[1]], shortName: reElemNameParts[2] };
+  function namespace(name) {
+    var reElemNameParts = /^(?:(.*):)?(.*)$/.exec(name);
+    return { namespace: jsonToDOM.namespaces[reElemNameParts[1]], shortName: reElemNameParts[2] };
+  }
+
+  // Note that 'elemNameOrArray' is: either the full element name (eg. [html:]div) or an array of elements in JSON notation
+  function tag(elemNameOrArray, elemAttr) {
+    // Array of elements?  Parse each one...
+    if (Array.isArray(elemNameOrArray)) {
+      var frag = doc.createDocumentFragment();
+      Array.forEach(arguments, function(thisElem) {
+        frag.appendChild(tag.apply(null, thisElem));
+      });
+      return frag;
     }
 
-    // Note that 'elemNameOrArray' is: either the full element name (eg. [html:]div) or an array of elements in JSON notation
-    function tag(elemNameOrArray, elemAttr) {
-        // Array of elements?  Parse each one...
-        if (Array.isArray(elemNameOrArray)) {
-            var frag = doc.createDocumentFragment();
-            Array.forEach(arguments, function(thisElem) {
-                frag.appendChild(tag.apply(null, thisElem));
-            });
-            return frag;
-        }
+    // Single element? Parse element namespace prefix (if none exists, default to defaultNamespace), and create element
+    var elemNs = namespace(elemNameOrArray);
+    var elem = doc.createElementNS(elemNs.namespace || jsonToDOM.defaultNamespace, elemNs.shortName);
 
-        // Single element? Parse element namespace prefix (if none exists, default to defaultNamespace), and create element
-        var elemNs = namespace(elemNameOrArray);
-        var elem = doc.createElementNS(elemNs.namespace || jsonToDOM.defaultNamespace, elemNs.shortName);
+    // Set element's attributes and/or callback functions (eg. onclick)
+    for (var key in elemAttr) {
+      var val = elemAttr[key];
+      if (nodes && key == "key") {
+        nodes[val] = elem;
+        continue;
+      }
 
-        // Set element's attributes and/or callback functions (eg. onclick)
-        for (var key in elemAttr) {
-            var val = elemAttr[key];
-            if (nodes && key == "key") {
-                nodes[val] = elem;
-                continue;
-            }
-
-            var attrNs = namespace(key);
-            if (typeof val == "function") {
-                // Special case for function attributes; don't just add them as 'on...' attributes, but as events, using addEventListener
-                elem.addEventListener(key.replace(/^on/, ""), val, false);
-            }
-            else {
-                // Note that the default namespace for XML attributes is, and should be, blank (ie. they're not in any namespace)
-                elem.setAttributeNS(attrNs.namespace || "", attrNs.shortName, val);
-            }
-        }
-
-        // Create and append this element's children
-        var childElems = Array.prototype.slice.call(arguments, 2);
-        childElems.forEach(function(childElem) {
-            if (childElem != null) {
-                elem.appendChild(
-                    childElem instanceof doc.defaultView.Node ? childElem :
-                        Array.isArray(childElem) ? tag.apply(null, childElem) :
-                            doc.createTextNode(childElem));
-            }
-        });
-
-        return elem;
+      var attrNs = namespace(key);
+      if (typeof val == "function") {
+        // Special case for function attributes; don't just add them as 'on...' attributes, but as events, using addEventListener
+        elem.addEventListener(key.replace(/^on/, ""), val, false);
+      }
+      else {
+        // Note that the default namespace for XML attributes is, and should be, blank (ie. they're not in any namespace)
+        elem.setAttributeNS(attrNs.namespace || "", attrNs.shortName, val);
+      }
     }
 
-    return tag.apply(null, jsonTemplate);
+    // Create and append this element's children
+    var childElems = Array.prototype.slice.call(arguments, 2);
+    childElems.forEach(function(childElem) {
+      if (childElem != null) {
+        elem.appendChild(
+          childElem instanceof doc.defaultView.Node ? childElem :
+            Array.isArray(childElem) ? tag.apply(null, childElem) :
+              doc.createTextNode(childElem));
+      }
+    });
+
+    return elem;
+  }
+
+  return tag.apply(null, jsonTemplate);
 }
